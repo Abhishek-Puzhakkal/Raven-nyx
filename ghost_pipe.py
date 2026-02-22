@@ -122,7 +122,7 @@ elif user_input.mode == 'connect':
 
             client.clt_close()
     
-    else : print(f'{user_input.addr} is not an private ip ')
+    else : print(f'{user_input.addr[0]} is not an private ip ')
     
 
 elif user_input.mode == 'connect-groupchat':
@@ -140,7 +140,7 @@ elif user_input.mode == 'connect-groupchat':
             gp_cht_client.client_gp_cht_snt_msg()
             gp_cht_client.client_gp_cht_connection_cls()
     
-    else : print(f'{user_input.addr} is not an private ip ')
+    else : print(f'{user_input.addr[0]} is not an private ip ')
         
 elif user_input.mode == 'listen-groupchat':
     gp_cht_server = GroupChatServer(user_input.port, user_input.u)
@@ -158,7 +158,7 @@ elif user_input.mode == 'share':
 
         share_file = File_sender(user_input.addr, user_input.port, user_input.file)
         share_file.send_file()
-    else : print(f'{user_input.addr} is not an private ip ')
+    else : print(f'{user_input.addr[0]} is not an private ip ')
 elif user_input.mode == 'accept_file':
     recv_file = file_reciver(user_input.path, user_input.port)
     recv_file.recvfile()

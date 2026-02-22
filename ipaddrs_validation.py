@@ -6,5 +6,9 @@ class IpAddressValidation :
 
     def validation(self) -> bool:
 
-        return ipaddress.ip_address(self.ip).is_private
+        try:
+
+            return ipaddress.ip_address(self.ip).is_private
+        except ValueError:
+            pass
         
