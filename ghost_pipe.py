@@ -3,6 +3,7 @@ from client import Client, GpChatClient
 from server import Server, GroupChatServer
 from file_sharing import file_reciver, File_sender
 import threading
+from ipaddrs_validation import *
 
 command = argparse.ArgumentParser(description='     ghost_pipe is a lan communication and file sharing tool,' \
                                         'in this tool , there is two types of communication is possible , \n 1. ONE TO ONE Communication :- one server and one client \n ' \
@@ -105,26 +106,41 @@ if user_input.mode == 'listen':
         server.serv_closing()
         
 elif user_input.mode == 'connect':
-    client = Client(user_input.addr, user_input.port, user_input.u)
-    connection_result = client.clinet_server_connection()
 
-    if connection_result:
-        trd = threading.Thread(target=client.client_recv_msg)
-        trd.start()
+    ip_validation = IpAddressValidation()
 
-        client.clinet_snt_msg()
+    if ip_validation.validation():
 
-        client.clt_close()
+        client = Client(user_input.addr, user_input.port, user_input.u)
+        connection_result = client.clinet_server_connection()
+
+        if connection_result:
+            trd = threading.Thread(target=client.client_recv_msg)
+            trd.start()
+
+            client.clinet_snt_msg()
+
+            client.clt_close()
+    
+    else : print(f'{user_input.addr} is not an private ip ')
+    
 
 elif user_input.mode == 'connect-groupchat':
-    gp_cht_client = GpChatClient(user_input.addr, user_input.port, user_input.u)
 
-    connection_result = gp_cht_client.client_gp_chat_connection()
-    if connection_result:
-        trd = threading.Thread(target=gp_cht_client.client_gp_cht_recv_msg)
-        trd.start()
-        gp_cht_client.client_gp_cht_snt_msg()
-        gp_cht_client.client_gp_cht_connection_cls()
+    ip_validation = IpAddressValidation()
+
+    if ip_validation.validation():
+
+        gp_cht_client = GpChatClient(user_input.addr, user_input.port, user_input.u)
+
+        connection_result = gp_cht_client.client_gp_chat_connection()
+        if connection_result:
+            trd = threading.Thread(target=gp_cht_client.client_gp_cht_recv_msg)
+            trd.start()
+            gp_cht_client.client_gp_cht_snt_msg()
+            gp_cht_client.client_gp_cht_connection_cls()
+    
+    else : print(f'{user_input.addr} is not an private ip ')
         
 elif user_input.mode == 'listen-groupchat':
     gp_cht_server = GroupChatServer(user_input.port, user_input.u)
@@ -136,8 +152,13 @@ elif user_input.mode == 'listen-groupchat':
     
 
 elif user_input.mode == 'share':
-    share_file = File_sender(user_input.addr, user_input.port, user_input.file)
-    share_file.send_file()
+    ip_validation = IpAddressValidation()
+
+    if ip_validation.validation():
+
+        share_file = File_sender(user_input.addr, user_input.port, user_input.file)
+        share_file.send_file()
+    else : print(f'{user_input.addr} is not an private ip ')
 elif user_input.mode == 'accept_file':
     recv_file = file_reciver(user_input.path, user_input.port)
     recv_file.recvfile()
