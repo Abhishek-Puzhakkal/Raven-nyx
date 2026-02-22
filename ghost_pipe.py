@@ -107,7 +107,7 @@ if user_input.mode == 'listen':
         
 elif user_input.mode == 'connect':
 
-    ip_validation = IpAddressValidation()
+    ip_validation = IpAddressValidation(user_input.addr)
 
     if ip_validation.validation():
 
@@ -127,7 +127,7 @@ elif user_input.mode == 'connect':
 
 elif user_input.mode == 'connect-groupchat':
 
-    ip_validation = IpAddressValidation()
+    ip_validation = IpAddressValidation(user_input.addr)
 
     if ip_validation.validation():
 
@@ -152,7 +152,7 @@ elif user_input.mode == 'listen-groupchat':
     
 
 elif user_input.mode == 'share':
-    ip_validation = IpAddressValidation()
+    ip_validation = IpAddressValidation(user_input.addr)
 
     if ip_validation.validation():
 
