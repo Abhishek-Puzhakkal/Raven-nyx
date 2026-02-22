@@ -1,6 +1,6 @@
-# **GHOST_PIPE**
+# GHOST_PIPE
 
-### **INTRODUCTION**
+### INTRODUCTION
 
   GhostPipe is a LAN-based communication and file-sharing tool developed using Python. It supports one-to-one chat and group chatting. There are no OS limitations, and it works across different operating systems.
 
@@ -8,13 +8,13 @@ File sharing is supported only between two computers (one-to-one), not one-to-ma
 
 Currently, GhostPipe is a CLI-based tool. In the future, it will include a TUI built using the Textual framework.
 
-### **FEATURES**
+### FEATURES
 
   1.file sharing from one computer to another computer
   2.ONE-TO-ONE chat, one server and one client
   3.GROUP-CHAT, one server and many clients
 
-### **INSTALLATION
+### INSTALLATION
 
     git  clone https://github.com/Abhishek-Puzhakkal/ghost_pipe.git
 
@@ -28,7 +28,7 @@ Currently, GhostPipe is a CLI-based tool. In the future, it will include a TUI b
 
     pip install -r requirements.txt
 
-### **USAGE 
+### USAGE 
 
    ONE TO ONE CHAT 
 
@@ -62,7 +62,7 @@ Currently, GhostPipe is a CLI-based tool. In the future, it will include a TUI b
 
     python ghost_pipe.py connect-groupchat --addr 192.168.1.3 --port 1234 -u client_1
                                         
-  ### **FILE SHARING**
+  ### FILE SHARING**
 
   FILE RECEIVER COMMAND 
 
@@ -80,7 +80,7 @@ Currently, GhostPipe is a CLI-based tool. In the future, it will include a TUI b
 
     python ghost_pipe.py share --file hello.txt --addr 192.168.1.3 --port 1234
 
-### **HOW THIS TOOL BASICALLY WORK 
+### HOW THIS TOOL BASICALLY WORK 
 
   In this this tool both client and server side can be client and server, don't be confused , just imagine client_a and client_b  is chatting, the code in both side have the capability to be a client and server , it decide by the command , 
 
