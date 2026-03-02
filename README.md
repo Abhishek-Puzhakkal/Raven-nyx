@@ -11,7 +11,9 @@ Currently, GhostPipe is a CLI-based tool. In the future, it will include a TUI b
 ### FEATURES
 
   1.file sharing from one computer to another computer
+  
   2.ONE-TO-ONE chat, one server and one client
+  
   3.GROUP-CHAT, one server and many clients
 
 ### INSTALLATION
@@ -32,14 +34,14 @@ Currently, GhostPipe is a CLI-based tool. In the future, it will include a TUI b
 
    ONE TO ONE CHAT 
 
-  ghost_pipe.py listen --port < specify a port for server listening for incoming connection> -u <server username for the chat>
+    python ghost_pipe.py listen --port < specify a port for server listening for incoming connection> -u <server username for the chat>
 
   #Above command is for server to listen for client connection then later communication 
                     # To end the chat just type and send 'quit'
                     
     python ghost_pipe.py listen --port 1234 -u server 
 
-  ghost_pipe.py connect --addr <internal ip of the server> --port <server listening port> -u < your usernmae for the chat>
+    ghost_pipe.py connect --addr <internal ip of the server> --port <server listening port> -u < your usernmae for the chat> #the username will print clint chat , if user name is 'server', it print like 'server : hi'
 
   #Above command is for connect to server for the one to one chat
                     #To end the chat just type and send 'quit'
@@ -48,14 +50,14 @@ Currently, GhostPipe is a CLI-based tool. In the future, it will include a TUI b
                                         
   GROUP CHATTING
 
-  ghost_pipe.py listen-groupchat --port <specify a port for server listening for incoming connection> -u <server username for the group chat >
+    ghost_pipe.py listen-groupchat --port <specify a port for server listening for incoming connection> -u <server username for the group chat >
 
   #Above command is for server to listening and initiating group chat
                     # To end the chat just type and send 'quit'
 
     python ghost_pipe.py listen-groupchat --port 1234 -u server
                 
-  ghost_pipe.py connect-groupchat --addr <internal ip of the server> --port <server listening port> -u < your usernmae for the chat>
+    ghost_pipe.py connect-groupchat --addr <internal ip of the server> --port <server listening port> -u < your usernmae for the chat>
 
   #Above command is for client's to connect to server for the group chat 
                     # To end the chat just type and send 'quit'
