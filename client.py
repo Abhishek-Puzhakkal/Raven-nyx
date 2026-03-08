@@ -48,10 +48,8 @@ class Client:
                 if not self.running:
                     break
 
-
                 if message == 'quit':
                     
-
                     self.clinet_message = self.username + ' : '+ message
 
                     self.client_socket.sendall(self.cryptography.encrypt(self.clinet_message.encode()))
@@ -146,16 +144,17 @@ class GpChatClient:
                 message = input('\nyou : ')
                 if not self.client_running:
                     break
-
-                msg = self.uername + ' : ' + message
                 
-                if message == 'quit':
-                    self.client_gp_chat_socket.sendall(self.proto.encrypt(msg.encode()))
-                    print('you enterd the "quit", so conection terminating....')
-                    self.client_running = False
-                    break
+                if message:
+                    msg = self.uername + ' : ' + message
+                    
+                    if message == 'quit':
+                        self.client_gp_chat_socket.sendall(self.proto.encrypt(msg.encode()))
+                        print('you enterd the "quit", so conection terminating....')
+                        self.client_running = False
+                        break
 
-                self.client_gp_chat_socket.sendall(self.proto.encrypt(msg.encode()))
+                    self.client_gp_chat_socket.sendall(self.proto.encrypt(msg.encode()))
         except KeyboardInterrupt:
             print('keyboard intrepted ....')
         except Exception as e :

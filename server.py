@@ -54,14 +54,14 @@ class Server:
 
             if not self.running:
              break
-            
-            if message == 'quit':
-                
+            if message:
+                if message == 'quit':
+                    
+                    self.client.sendall(self.proto.encrypt(self.serv_message.encode()))
+                    print('\nyou entered quit , the connection is terminating......', flush=True)
+                    self.running = False
+                    break
                 self.client.sendall(self.proto.encrypt(self.serv_message.encode()))
-                print('\nyou entered quit , the connection is terminating......', flush=True)
-                self.running = False
-                break
-            self.client.sendall(self.proto.encrypt(self.serv_message.encode()))
         
         
     def server_recv_msg(self):
@@ -223,18 +223,20 @@ class GroupChatServer:
                 server_message = input('\nyou : ')
                 if not self.server_running:
                     break
-                server_message_broadcast = server_message_flag + ' ' + self.username + ' : '+ server_message
-                
-                if server_message == 'quit':
-                    self.server_running = False
-                    for clients, session_key in self.clients_socket_session_key_mapping.items():
-                        
-                        clients.sendall(session_key.encrypt(server_message_broadcast.encode()))
-                    print('you enterd quit , connection going to terminate....')
+
+                if server_message:
+                    server_message_broadcast = server_message_flag + ' ' + self.username + ' : '+ server_message
                     
-                    break
-                for clients, session_key in self.clients_socket_session_key_mapping.items():
-                    clients.sendall(session_key.encrypt(server_message_broadcast.encode()))
+                    if server_message == 'quit':
+                        self.server_running = False
+                        for clients, session_key in self.clients_socket_session_key_mapping.items():
+                            
+                            clients.sendall(session_key.encrypt(server_message_broadcast.encode()))
+                        print('you enterd quit , connection going to terminate....')
+                        
+                        break
+                    for clients, session_key in self.clients_socket_session_key_mapping.items():
+                        clients.sendall(session_key.encrypt(server_message_broadcast.encode()))
         except KeyboardInterrupt:
             print('keyboard interpted....')
         except Exception as e:
