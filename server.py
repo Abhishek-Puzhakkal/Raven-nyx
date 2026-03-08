@@ -117,7 +117,6 @@ class GroupChatServer:
         self.gp_chat_svr_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.gp_chat_svr_socket.settimeout(1.0)
         self.gp_chat_svr_socket.bind(('0.0.0.0', self.port))
-        '''while self.server_running:'''
         self.gp_chat_svr_socket.listen()
         
         print('\nserver started listening.....')
@@ -211,7 +210,6 @@ class GroupChatServer:
                     break
                 if clients_socket not in self.clients_socket_session_key_mapping:
                     print(f'\nnew connection arrived , {clients_addr} ')
-                    print('hand shake initialising....')
                     noise = NoiseConnection.from_name(b'Noise_NN_25519_ChaChaPoly_SHA256')
                     noise.set_as_responder()
                     noise.start_handshake()

@@ -124,8 +124,6 @@ class GpChatClient:
         self.client_running = True
         self.quit_checker = list()
         self.proto = None
-        '''self.gp_cht_cryptography_ky = b'2b1gSNyIH1g3-huR0gAHcuCZK1mFURW46xiuWsEnw_M='
-        self.gp_cryptography_object = Fernet(self.gp_cht_cryptography_ky)'''
     def client_gp_chat_connection(self):
         try :
             self.client_gp_chat_socket.connect((self.addr, self.port))
