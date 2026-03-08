@@ -141,7 +141,7 @@ class GroupChatServer:
                     
                     broadcasting_flag = 'broadcasting'
                     
-                    if decrypted_client_msg and len(self.clients_dict) >= 2:
+                    if decrypted_client_msg and len(self.clients_socket_session_key_mapping) >= 2:
                         self.quict_checker = decrypted_client_msg.split()
                         username = self.quict_checker[0]
                         if len(self.quict_checker) == 3 and self.quict_checker[2] == 'quit':
@@ -169,7 +169,7 @@ class GroupChatServer:
                                 else:
                                     clients.sendall(session_key.encrypt(broadcasting_message.encode()))
                                     
-                    elif decrypted_client_msg and len(self.clients_dict) < 2:
+                    elif decrypted_client_msg and len(self.clients_socket_session_key_mapping) < 2:
                         self.quict_checker = decrypted_client_msg.split()
                         
                         if len(self.quict_checker) == 3 and self.quict_checker[2] == "quit":
@@ -241,8 +241,9 @@ class GroupChatServer:
             print(e)
                 
     def gp_chat_close(self):
-        for clients in self.clients_dict:
+        for clients in self.clients_socket_session_key_mapping:
             clients.close()
+            self.clients_socket_session_key_mapping.pop(clients)
         self.gp_chat_svr_socket.close()
         print('entire connection closed peacefully....')
 
