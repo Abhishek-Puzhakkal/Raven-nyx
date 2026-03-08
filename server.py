@@ -92,8 +92,12 @@ class Server:
             print(f'\n {client_message_decrypted}')
         
     def serv_closing(self):
-        self.client.close()
-        self.server.close()
+        try:
+            self.client.close()
+            self.server.close()
+        except KeyboardInterrupt:
+            print("\nServer stopped manually.")
+
 
 
 class GroupChatServer:
@@ -244,10 +248,13 @@ class GroupChatServer:
             print(e)
                 
     def gp_chat_close(self):
-        for clients in self.clients_socket_session_key_mapping:
-            clients.close()
-        self.gp_chat_svr_socket.close()
-        print('entire connection closed peacefully....')
+        try :
+            for clients in self.clients_socket_session_key_mapping:
+                clients.close()
+            self.gp_chat_svr_socket.close()
+            print('entire connection closed peacefully....')
+        except KeyboardInterrupt:
+            print("\nServer stopped manually.")
 
 
 

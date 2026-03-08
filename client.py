@@ -109,7 +109,10 @@ class Client:
         
 
     def clt_close(self):
-        self.client_socket.close()
+        try:
+            self.client_socket.close()
+        except KeyboardInterrupt:
+            print("\nServer stopped manually.")
 
 
 class GpChatClient:
@@ -203,8 +206,11 @@ class GpChatClient:
                 
 
     def client_gp_cht_connection_cls(self):
-        self.client_gp_chat_socket.close()
-        print('\nthe connection closed peacefully....')
+        try :
+            self.client_gp_chat_socket.close()
+            print('\nthe connection closed peacefully....')
+        except KeyboardInterrupt:
+            print("\nServer stopped manually.")
 
         
         
