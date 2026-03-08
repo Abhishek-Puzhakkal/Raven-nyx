@@ -148,7 +148,10 @@ elif user_input.mode == 'listen-groupchat':
     trd = threading.Thread(target=gp_cht_server.connection)
     trd.start()
     gp_cht_server.gp_srvr_snt_msg()
-    gp_cht_server.gp_chat_close()
+    try :
+        gp_cht_server.gp_chat_close()
+    except KeyboardInterrupt:
+        print("\nServer stopped manually.")
     
 
 elif user_input.mode == 'share':
