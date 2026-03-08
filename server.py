@@ -19,7 +19,7 @@ class Server:
     
     def server_client_connect(self) :
         try:
-            
+            self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.server.bind(('0.0.0.0', self.port))
             self.server.listen()
 
@@ -110,6 +110,7 @@ class GroupChatServer:
         self.gp_cryptography_object = Fernet(self.gp_cht_cryptography_ky)'''
         self.clients_socket_session_key_mapping = dict()
     def connection(self):
+        self.gp_chat_svr_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.gp_chat_svr_socket.bind(('0.0.0.0', self.port))
         self.gp_chat_svr_socket.listen()
         
