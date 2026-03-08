@@ -115,6 +115,7 @@ class GroupChatServer:
         self.clients_socket_session_key_mapping = dict()
     def connection(self):
         self.gp_chat_svr_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.gp_chat_svr_socket.settimeout(1.0)
         self.gp_chat_svr_socket.bind(('0.0.0.0', self.port))
         '''while self.server_running:'''
         self.gp_chat_svr_socket.listen()
