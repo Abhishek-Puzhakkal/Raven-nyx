@@ -138,14 +138,14 @@ elif user_input.mode == 'connect-groupchat':
                 trd = threading.Thread(target=gp_cht_client.client_gp_cht_recv_msg)
                 trd.start()
                 gp_cht_client.client_gp_cht_snt_msg()
-                '''gp_cht_client.client_gp_cht_connection_cls()
-                trd.join()'''
+                gp_cht_client.client_gp_cht_connection_cls()
+                trd.join()
             except KeyboardInterrupt:
                 print("\nServer stopped manually.")
-            finally:
+            '''finally:
                 gp_cht_client.client_gp_cht_connection_cls()
                 if trd:
-                    trd.join()
+                    trd.join()'''
 
             
     
@@ -157,16 +157,17 @@ elif user_input.mode == 'listen-groupchat':
         trd = threading.Thread(target=gp_cht_server.connection)
         trd.start()
         gp_cht_server.gp_srvr_snt_msg()
-        '''gp_cht_server.gp_chat_close()
-        trd.join()'''
+        gp_cht_server.gp_chat_close()
+        print(f"Is the thread actually dead? {not trd.is_alive()}")
+        trd.join()
         
     except KeyboardInterrupt:
         print("\nServer stopped manually.")
-    finally:
+    '''finally:
         gp_cht_server.gp_chat_close()
         if trd:
             trd.join()
-    
+    '''
     
 
 elif user_input.mode == 'share':
