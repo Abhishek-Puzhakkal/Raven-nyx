@@ -144,7 +144,10 @@ elif user_input.mode == 'connect-groupchat':
                 print("\nServer stopped manually.")
             finally:
                 gp_cht_client.client_gp_cht_connection_cls()
-                trd.join()
+                if trd:
+                    trd.join()
+
+            
     
     else : print(f'{user_input.addr[0]} is not an private ip ')
         
@@ -161,7 +164,9 @@ elif user_input.mode == 'listen-groupchat':
         print("\nServer stopped manually.")
     finally:
         gp_cht_server.gp_chat_close()
-        trd.join()
+        if trd:
+            trd.join()
+    
     
 
 elif user_input.mode == 'share':
