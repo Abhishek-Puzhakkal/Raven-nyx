@@ -100,10 +100,9 @@ if user_input.mode == 'listen':
         print(f'connected to {clinet_addr}')
         trd = threading.Thread(target=server.server_recv_msg)
         trd.start()
-        
         server.server_snt_msg()
-
         server.serv_closing()
+        
         
 elif user_input.mode == 'connect':
 
@@ -140,6 +139,7 @@ elif user_input.mode == 'connect-groupchat':
                 trd.start()
                 gp_cht_client.client_gp_cht_snt_msg()
                 gp_cht_client.client_gp_cht_connection_cls()
+                trd.join()
             except KeyboardInterrupt:
                 print("\nServer stopped manually.")
     
@@ -152,6 +152,7 @@ elif user_input.mode == 'listen-groupchat':
         trd.start()
         gp_cht_server.gp_srvr_snt_msg()
         gp_cht_server.gp_chat_close()
+        trd.join()
         
     except KeyboardInterrupt:
         print("\nServer stopped manually.")
