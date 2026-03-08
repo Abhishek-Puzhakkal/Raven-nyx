@@ -135,21 +135,24 @@ elif user_input.mode == 'connect-groupchat':
 
         connection_result = gp_cht_client.client_gp_chat_connection()
         if connection_result:
-            trd = threading.Thread(target=gp_cht_client.client_gp_cht_recv_msg)
-            trd.start()
-            gp_cht_client.client_gp_cht_snt_msg()
-            gp_cht_client.client_gp_cht_connection_cls()
+            try:
+                trd = threading.Thread(target=gp_cht_client.client_gp_cht_recv_msg)
+                trd.start()
+                gp_cht_client.client_gp_cht_snt_msg()
+                gp_cht_client.client_gp_cht_connection_cls()
+            except KeyboardInterrupt:
+                print("\nServer stopped manually.")
     
     else : print(f'{user_input.addr[0]} is not an private ip ')
         
 elif user_input.mode == 'listen-groupchat':
     gp_cht_server = GroupChatServer(user_input.port, user_input.u)
-
-    trd = threading.Thread(target=gp_cht_server.connection)
-    trd.start()
-    gp_cht_server.gp_srvr_snt_msg()
     try :
+        trd = threading.Thread(target=gp_cht_server.connection)
+        trd.start()
+        gp_cht_server.gp_srvr_snt_msg()
         gp_cht_server.gp_chat_close()
+        
     except KeyboardInterrupt:
         print("\nServer stopped manually.")
     
