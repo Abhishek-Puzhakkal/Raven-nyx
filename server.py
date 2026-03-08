@@ -198,6 +198,9 @@ class GroupChatServer:
                     break
 
                 clients_socket, clients_addr = self.gp_chat_svr_socket.accept()
+
+            except TimeoutError:
+                continue
             except OSError as e:
                 if not self.server_running:
                     break
