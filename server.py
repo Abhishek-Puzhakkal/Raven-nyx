@@ -116,6 +116,7 @@ class GroupChatServer:
     def connection(self):
         self.gp_chat_svr_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.gp_chat_svr_socket.bind(('0.0.0.0', self.port))
+        '''while self.server_running:'''
         self.gp_chat_svr_socket.listen()
         
         print('\nserver started listening.....')
@@ -192,6 +193,8 @@ class GroupChatServer:
 
         while self.server_running:
             try:
+                if not self.server_running:
+                    break
 
                 clients_socket, clients_addr = self.gp_chat_svr_socket.accept()
             except OSError as e:
@@ -200,6 +203,8 @@ class GroupChatServer:
                 else:
                     raise
             if clients_socket:
+                if not self.server_running:
+                    break
                 if clients_socket not in self.clients_socket_session_key_mapping:
                     print(f'\nnew connection arrived , {clients_addr} ')
                     print('hand shake initialising....')
