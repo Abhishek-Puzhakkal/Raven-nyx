@@ -243,8 +243,8 @@ class GroupChatServer:
     def gp_chat_close(self):
         for clients in self.clients_socket_session_key_mapping:
             clients.close()
-            self.clients_socket_session_key_mapping.pop(clients)
         self.gp_chat_svr_socket.close()
+        self.clients_socket_session_key_mapping.clear()
         print('entire connection closed peacefully....')
 
 
