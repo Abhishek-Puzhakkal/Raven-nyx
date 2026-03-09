@@ -1,6 +1,6 @@
 import argparse
-from client import Client, GpChatClient
-from server import Server, GroupChatServer
+from client import Client, GpChatClient, TorClient, TorGpChatClient
+from server import Server, GroupChatServer, TorGpServer, TorOneToOneServer
 from file_sharing import file_reciver, File_sender
 import threading
 from ipaddrs_validation import *
@@ -89,6 +89,21 @@ listen_group_chat = sub_command.add_parser('listen-groupchat', help='server to i
 listen_group_chat.add_argument('--port', type=int, nargs=1, required=True, metavar='port number', help='specify a port number to connect for clients')
 listen_group_chat.add_argument('-u', type=str, nargs=1, required=True, metavar='username', help="this name will print in other's chating area while you sending message")
 
+conn_tor_chat = sub_command.add_parser('conn-tr-cht', help='clinet to initiate tor based one to one chat')
+conn_tor_chat.add_argument('--addr',type=str, nargs=1, required=True, metavar='onion address', help='specify the onion address of the server')
+conn_tor_chat.add_argument('-u', type=str, required=True, nargs=1, metavar='username', help='this name will show in server chat box while you messaging'  )
+
+tor_chat_listen = sub_command.add_parser('lstn-tr-cht', help='server to intiate tor server for communcation')
+tor_chat_listen.add_argument('-u', type=str, nargs=1, required=True, metavar='username', help='specify a name , that will appear in client chat box while messaging' )
+
+conn_tr_gp_cht = sub_command.add_parser('conn_tr_gp_cht', help='clinet to connect to server for group communcation')
+conn_tr_gp_cht.add_argument('--addr', type=str, nargs=1, required=True, metavar='onion address', help='specify the server onion address')
+conn_tr_gp_cht.add_argument('-u', type=str, nargs=1, required=True, metavar='username', help='this name will show in server and clients chat box while you messaging' )
+
+lstn_tr_gp_cht = sub_command.add_parser('lstn_tr_gp_cht',help='server to intiate tor server for group communication' )
+lstn_tr_gp_cht.add_argument('-u', type=str, nargs=1, required=True, metavar='username', help='specify a name , that will appear in clients chat box while you messaging')
+
+
 
 user_input = command.parse_args()
 
@@ -167,8 +182,56 @@ elif user_input.mode == 'listen-groupchat':
         gp_cht_server.gp_chat_close()
         if trd:
             trd.join()
-    
-    
+
+elif user_input.mode == 'conn_tor_chat':
+    tr_client = TorClient(user_input.addr, user_input.u)
+    connection_result = tr_client.clinet_tor_server_connection()
+    if connection_result:
+        trd = threading.Thread(target=tr_client.client_recv_msg)
+        trd.start()
+        tr_client.clinet_snt_msg()
+        tr_client.client_conn_close()
+
+elif user_input.mode == 'tor_chat_listen':
+    tr_server = TorOneToOneServer(user_input.u)
+    clinett, clinet_addr = tr_server.tor_server_clinet_connect()
+    if clinett:
+        print(f'connected to {clinet_addr}')
+        trd = threading.Thread(target=tr_server.tor_server_recv_message)
+        trd.start()
+        tr_server.tor_server_snt_message()
+        tr_server.tor_server_closing()
+
+elif user_input.mode == 'conn_tr_gp_cht':
+    tor_gp_cht_client = TorGpChatClient(user_input.addr, user_input.u)
+
+    connection_result = tor_gp_cht_client.client_gp_chat_connection()
+    if connection_result:
+        try:
+            trd = threading.Thread(target=tor_gp_cht_client.tor_client_gp_cht_recv_msg)
+            trd.start()
+            tor_gp_cht_client.tor_client_gp_cht_snt_msg()
+        except KeyboardInterrupt:
+            print("\nServer stopped manually.")
+        finally:
+            tor_gp_cht_client.tor_client_gp_cht_connection_cls()
+            if trd:
+                trd.join()
+
+elif user_input.mode == 'lstn_tr_gp_cht':
+    tor_gp_cht_server = TorGpServer(user_input.u)
+    try :
+        trd = threading.Thread(target=tor_gp_cht_server.tor_server_client_connection)
+        trd.start()
+        tor_gp_cht_server.tor_gp_srvr_snt_msg()
+    except KeyboardInterrupt:
+        print("\nServer stopped manually.")
+    finally:
+        tor_gp_cht_server.tor_gp_chat_close()
+        if trd:
+            trd.join()
+
+
 
 elif user_input.mode == 'share':
     ip_validation = IpAddressValidation(user_input.addr)

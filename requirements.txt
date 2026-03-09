@@ -2,5 +2,7 @@ cffi==2.0.0
 cryptography==46.0.5
 noiseprotocol==0.3.1
 pycparser==3.0
+PySocks==1.7.1
+stem==1.8.2
 tqdm==4.67.3
 typing_extensions==4.15.0

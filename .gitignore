@@ -6,3 +6,4 @@ venv/
 .vscode/
 *_checking.py
 hello.txt
+.onion_key.txt
