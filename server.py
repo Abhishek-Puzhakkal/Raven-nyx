@@ -349,7 +349,8 @@ class TorOneToOneServer():
             if not self.server_running:
                 break
 
-            client_message_decrypted = self.tor_proto.decrypt(client_message.decode())
+            client_message_decrypted = self.tor_proto.decrypt(client_message).decode()
+        
             self.quit_checker = list(client_message_decrypted.split())
             if len(self.quit_checker) == 3 and self.quit_checker[2] == 'quit':
                 self.server_running = False
