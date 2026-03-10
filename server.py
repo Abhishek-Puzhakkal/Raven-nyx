@@ -398,8 +398,8 @@ class TorGpServer():
             with open(self.key_path) as key_file:
                  key_type, key_content = key_file.read().split(':', 1)
 
-        service = self.tor_gp_chat_controller.create_ephemeral_hidden_service({80: 5000}, key_type = key_type, key_content = key_content, await_publication = True)
-        print("Resumed %s.onion" % service.service_id)
+            service = self.tor_gp_chat_controller.create_ephemeral_hidden_service({80: 5000}, key_type = key_type, key_content = key_content, await_publication = True)
+            print("Resumed %s.onion" % service.service_id)
         self.tor_gp_chat_svr_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.tor_gp_chat_svr_socket.settimeout(1.0)
         self.tor_gp_chat_svr_socket.bind(('127.0.0.1', 5000))
