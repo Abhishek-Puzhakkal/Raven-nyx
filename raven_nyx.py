@@ -215,7 +215,7 @@ elif user_input.mode == 'listen-groupchat':
         if trd:
             trd.join()
 
-elif user_input.mode == 'conn_tor_chat':
+elif user_input.mode == 'conn-tr-cht':
     tr_client = TorClient(user_input.addr, user_input.u)
     connection_result = tr_client.clinet_tor_server_connection()
     if connection_result:
@@ -224,7 +224,7 @@ elif user_input.mode == 'conn_tor_chat':
         tr_client.clinet_snt_msg()
         tr_client.client_conn_close()
 
-elif user_input.mode == 'tor_chat_listen':
+elif user_input.mode == 'lstn-tr-cht':
     tr_server = TorOneToOneServer(user_input.u)
     clinett, clinet_addr = tr_server.tor_server_clinet_connect()
     if clinett:
