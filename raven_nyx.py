@@ -5,53 +5,85 @@ from file_sharing import file_reciver, File_sender
 import threading
 from ipaddrs_validation import *
 
-command = argparse.ArgumentParser(description='     ghost_pipe is a lan communication and file sharing tool,' \
-                                        'in this tool , there is two types of communication is possible , \n 1. ONE TO ONE Communication :- one server and one client \n ' \
-                                        '2.GROUP CHAT:- One server and many clients',
+command = argparse.ArgumentParser(description="     Ravenyx is a secure peer-to-peer or P2P messaging and file-sharing system designed for privacy-focused communication." \
+                                                "It supports encrypted one-to-one and  group communication, and file transfer over both Tor onion services and LAN. " \
+                                                "The system uses modern cryptographic protocols (noise protocol framework NN pattern handshake) to establish secure sessions and allows users to communicate without relying on centralized servers.",
                                   epilog=""" 
         USEAGE 
 
-            ONE TO ONE CHAT 
+            LAN ONE TO ONE CHAT 
 
-                ghost_pipe.py listen --port < specify a port for server listening for incoming connection> -u <server username for the chat>
+                raven_nyx.py listen --port < specify a port for server listening for incoming connection> -u <server username for the chat>
 
                     #Above command is for server to listen for client connection then later communication 
                     # To end the chat just type and send 'quit'
                     
-                    # eg :- ghost_pipe.py listen --port 1234 -u server 
+                    # eg :- raven_nyx.py listen --port 1234 -u server 
 
-                ghost_pipe.py connect --addr <internal ip of the server> --port <server listening port> -u < your usernmae for the chat>
+                raven_nyx.py connect --addr <internal ip of the server> --port <server listening port> -u < your usernmae for the chat>
 
                     #Above command is for connect to server for the one to one chat
                     #To end the chat just type and send 'quit'
 
-                    #eg :- ghost_pipe.py connect --addr 192.168.1.3 --port 1234 -u client
+                    #eg :- raven_nyx.py connect --addr 192.168.1.3 --port 1234 -u client
                                         
-            GROUP CHATING
+            LAN GROUP CHATING
 
-                ghost_pipe.py listen-groupchat --port <specify a port for server listening for incoming connection> -u <server username for the group chat >
+                raven_nyx.py listen-groupchat --port <specify a port for server listening for incoming connection> -u <server username for the group chat >
 
                     #Above command is for server to listening and intiating group chat
                     # To end the chat just type and send 'quit'
 
-                    # eg :- ghost_pipe.py listening-groupchat --port 1234 -u server
+                    # eg :- raven_nyx.py listening-groupchat --port 1234 -u server
                 
-                ghost_pipe.py connect-groupchat --addr <internal ip of the server> --port <server listening port> -u < your usernmae for the chat>
+                raven_nyx.py connect-groupchat --addr <internal ip of the server> --port <server listening port> -u < your usernmae for the chat>
 
                     #Above command is for client's to connect to server for the group chat 
                     # To end the chat just type and send 'quit'
 
-                    # eg :- ghost_pipe.py connect-groupchat --addr 192.168.1.3 --port 1234 -u client_1
-                                        
+                    # eg :- raven_nyx.py connect-groupchat --addr 192.168.1.3 --port 1234 -u client_1
+            
+            TOR ONE TO ONE COMMUNICATION
+
+                raven_nyx.py lstn-tr-cht -u <username>
+
+                    #Above command is for server to to initialize onion service and begins the Tor based one to one communcation
+
+                    # eg :- raven_nyx.py lstn-tr-cht -u server
+                
+                raven_nyx.py conn-tr-cht --addr < server onion address > -u <username>
+
+                    #Above command for client side to connect to server
+
+                    #eg :- raven_nyx conn-tr-cht --addr m5yq2k7x3v4t6p9n8r1s2u3w4x5y6z7a8b9c2d3e4f5g6h7i8j9k2l3.onion -u clinet
+
+                    #Above mentioned onion address is just a demo one , not a real one
+            
+            TOR GROUP COMMUNCATION
+
+                raven_nyx.py lstn_tr_gp_cht -u <username>
+
+                    # Above command to server side to intialize onion service and begins Tor based group communication
+
+                    # eg:- raven_nyx.py lstn_tr_gp_cht -u server
+                
+                raven_nyx.py conn_tr_gp_cht --addr < server onion address > -u <username>
+
+                    #Above command for clinet side to connect tor based communcation
+
+                    # eg :- raven_nyx.py conn_tr_gp_cht --addr m5yq2k7x3v4t6p9n8r1s2u3w4x5y6z7a8b9c2d3e4f5g6h7i8j9k2l3.onion -u client_1
+
+                    #Above mentioned onion address is just a demo one , not a real one
+                           
             FILE SHARING
 
                 FILE RECEVER COMMAND 
 
-                    ghost_pipe.py accept_file --port <specify a port for sender to connect> --path < specify a path to save the file >
+                    raven_nyx.py accept_file --port <specify a port for sender to connect> --path < specify a path to save the file >
                 
                 FILE SENDER COMMAND 
 
-                    ghost_pipe.py share --file < path of the sending file > --addr < internal ip of recever > --port < listening port of receiver > 
+                    raven_nyx.py share --file < path of the sending file > --addr < internal ip of recever > --port < listening port of receiver > 
 
                 
             Author :- Abhishek Puzhakkal
