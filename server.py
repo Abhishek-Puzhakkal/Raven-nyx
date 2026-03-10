@@ -424,7 +424,7 @@ class TorGpServer():
                             raise
                     '''if not client_message:
                         break'''
-                    if not self.server_running:
+                    if not self.tor_server_running:
                         break
                 
                     
@@ -461,13 +461,13 @@ class TorGpServer():
                                 else:
                                     clients.sendall(session_key.encrypt(broadcasting_message.encode()))
                                     
-                    elif decrypted_client_msg and len(self.clients_socket_session_key_mapping) < 2:
+                    elif decrypted_client_msg and len(self.tor_clients_socket_session_key_mapping) < 2:
                         self.quict_checker = decrypted_client_msg.split()
                         
                         if len(self.quict_checker) == 3 and self.quict_checker[2] == "quit":
                             print(f'\n{decrypted_client_msg}')
                             print('\nthe entire connection is closing....')
-                            self.server_running = False
+                            self.tor_server_running = False
                             break
                         else:
                             print(f'\n{decrypted_client_msg}')
@@ -479,7 +479,7 @@ class TorGpServer():
 
         while self.tor_server_running:
             try:
-                if not self.server_running:
+                if not self.tor_server_running:
                     break
 
                 clients_socket, clients_addr = self.tor_gp_chat_svr_socket.accept()
@@ -487,12 +487,12 @@ class TorGpServer():
             except TimeoutError:
                 continue
             except OSError as e:
-                if not self.server_running:
+                if not self.tor_server_running:
                     break
                 else:
                     raise
             if clients_socket:
-                if not self.server_running:
+                if not self.tor_server_running:
                     break
                 if clients_socket not in self.tor_clients_socket_session_key_mapping:
                     print(f'\nnew connection arrived , {clients_addr} ')
