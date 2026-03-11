@@ -76,10 +76,12 @@ class Server:
 
             try :
                 recv_exact_byte = RecvExactBytes()
-                header_size = recv_exact_byte.recv_exact_bytes((self.client), 4 ,)
+                header_size = recv_exact_byte.recv_exact_bytes(self.client, 4 )
                 message_size = int.from_bytes(header_size, 'big')
 
-                client_message = recv_exact_byte.recv_exact_bytes((self.client), message_size,)
+                client_message = recv_exact_byte.recv_exact_bytes(self.client, message_size,)
+                client_message_decrypted = self.proto.decrypt(client_message).decode()
+                self.quit_checker = list(client_message_decrypted.split())
             except ConnectionError:
                 print('connection error found ....')
                 print('connection closiing...')
@@ -97,8 +99,8 @@ class Server:
                 break
             
             print(f'header_size :- {header_size}, message_size :- {message_size}, length_client_message = {len(client_message)}') #debugging
-            client_message_decrypted = self.proto.decrypt(client_message).decode()
-            self.quit_checker = list(client_message_decrypted.split())
+            '''client_message_decrypted = self.proto.decrypt(client_message).decode()
+            self.quit_checker = list(client_message_decrypted.split())'''
             if len(self.quit_checker) == 3 and self.quit_checker[2] == 'quit':
                 self.running = False
                 print(f'\n{client_message_decrypted}') 
