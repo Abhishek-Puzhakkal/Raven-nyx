@@ -452,19 +452,23 @@ class TorGpChatClient:
             print("\nServer stopped manually.")
 
 class RecvExactBytes():
-    def recv_exact_bytes(connection_socket, exact_byte:int):
+    def recv_exact_bytes(self, connection_socket, exact_byte:int):
 
         data = b''
 
         while len(data) < exact_byte:
 
-            chunk = connection_socket.recv( exact_byte - len(data))
+            try:
 
-            if not chunk:
-                raise ConnectionError("Peer disconnected")
-                break
+                chunk = connection_socket.recv( exact_byte - len(data))
 
-            data += chunk
+                if not chunk:
+                    raise ConnectionError("Peer disconnected")
+                    break
+
+                data += chunk
+            except Exception as e:
+                raise e 
         
         return data
 

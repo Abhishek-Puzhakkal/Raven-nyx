@@ -322,6 +322,7 @@ class TorOneToOneServer():
             service = self.tor_controller.create_ephemeral_hidden_service({80: 5000}, key_type = key_type, key_content = key_content, await_publication = True)
             print("Resumed %s.onion" % service.service_id)
 
+        self.tor_server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.tor_server_socket.bind(('127.0.0.1', 5000))
         self.tor_server_socket.listen()
 
@@ -371,12 +372,14 @@ class TorOneToOneServer():
     def tor_server_recv_message(self):
          while self.server_running:
 
+            message_size = None
+
             try :
                 recv_exact_byte = RecvExactBytes()
                 header_size = recv_exact_byte.recv_exact_bytes((self.tor_clinet_socket), 4)
                 message_size = int.from_bytes(header_size, 'big')
 
-                client_message = recv_exact_byte.recv_exact_bytes((self.tor_clinet_socket), message_size)
+                '''client_message = recv_exact_byte.recv_exact_bytes((self.tor_clinet_socket), message_size)'''
             except ConnectionError:
                 print('connection error found....')
                 print('connection is closing...')
@@ -393,7 +396,8 @@ class TorOneToOneServer():
                 
             if not self.server_running:
                 break
-
+            
+            client_message = recv_exact_byte.recv_exact_bytes((self.tor_clinet_socket), message_size)
             client_message_decrypted = self.tor_proto.decrypt(client_message).decode()
         
             self.quit_checker = list(client_message_decrypted.split())
@@ -621,19 +625,23 @@ class TorGpServer():
             print("\nServer stopped manually.")
 
 class RecvExactBytes():
-    def recv_exact_bytes(connection_socket, exact_byte:int):
+    def recv_exact_bytes(self, connection_socket, exact_byte:int):
 
         data = b''
 
         while len(data) < exact_byte:
 
-            chunk = connection_socket.recv( exact_byte - len(data))
+            try:
 
-            if not chunk:
-                raise ConnectionError("Peer disconnected")
-                break
+                chunk = connection_socket.recv( exact_byte - len(data))
 
-            data += chunk
+                if not chunk:
+                    raise ConnectionError("Peer disconnected")
+                    break
+
+                data += chunk
+            except Exception as e:
+                raise e 
         
         return data
 
