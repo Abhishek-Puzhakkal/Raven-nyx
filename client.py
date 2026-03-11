@@ -294,7 +294,7 @@ class TorClient():
                     
                     break
 
-                self.client_socket.sendall(self.tor_proto.encrypt(self.clinet_message.encode()))       
+                self.client_socket.sendall(encrypted_message_size_header + encrypted_message)       
 
     def client_recv_msg(self):
 
