@@ -613,12 +613,10 @@ class TorGpServer():
                         
                         break
                     for clients, session_key in self.tor_clients_socket_session_key_mapping.items():
-                        print(f'clinet :- {clients}, session_key :- {session_key}')
+                        
                         encrypted_message = session_key.encrypt(server_message_broadcast.encode())
 
                         encrypted_message_size_header = len(encrypted_message).to_bytes(4, 'big')
-
-                        print(f'message header :- {encrypted_message_size_header} \n encrypted_message :- {encrypted_message}')
                             
                         clients.sendall(encrypted_message_size_header + encrypted_message)
                         
