@@ -82,15 +82,19 @@ Currently, Ravennyx is a CLI-based tool. In the future, it will include a TUI bu
                     # To end the chat just type and send 'quit'
 
 
-  NOTE ABOUT TOR BASED COMMUNICATION :-
-        > importent thing is this , when you run tor based command make sure that tor is installed and it is running in you machine , otherwise             it will never work
-           use :- systemctl start tor #to start tor 
-        >also you must commentout two lines from /etc/tor/torrc
+  ###NOTE ABOUT TOR BASED COMMUNICATION 
+  
+  1.importent thing is this , when you run tor based command make sure that tor is installed and it is running in you machine , otherwise             it will never work
+    use :- systemctl start tor #to start tor
+           
+  2.also you must commentout two lines that metioned below from file  /etc/tor/torrc
            ControlPort 9051
            CookieAuthentication1
-        > always run Tor realted below commands as root 
-        > after running the tor server based command in you directory , there will be a hidde file '.onion_key.txt'
-          if you need to use another onion address next time just delete that file , then you will get new address otherwise the past address 
+           
+  3. always run Tor realted below commands as root
+  4. 
+  4.after running the tor server based command in you directory , there will be a hidde file '.onion_key.txt'
+     if you need to use another onion address next time just delete that file , then you will get new address otherwise the past address 
 
   TOR BASED ONE TO ONE COMMUNICATION
 
