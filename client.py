@@ -71,22 +71,44 @@ class Client:
                 
     def client_recv_msg(self):
 
+        def recv_exact_bytes( connection_socket, exact_byte:int):
+
+            print(f'exact_byte :- {exact_byte}')
+
+            data = b''
+
+            while len(data) < exact_byte:
+
+                try:
+
+                    chunk = connection_socket.recv( exact_byte - len(data))
+
+                    if not chunk:
+                        raise ConnectionError("Peer disconnected")
+                        break
+
+                    data += chunk
+                except Exception as e:
+                    raise e 
+        
+            return data
+
         while self.running:
             try: #debug
-                recv_exact_byte = RecvExactBytes()
+                '''recv_exact_byte = RecvExactBytes()'''
                 print(1)
-                header_size = recv_exact_byte.recv_exact_bytes(self.client_socket, 4)
-                print(1)
-                print(1)
+                header_size = recv_exact_bytes(self.client_socket, 4)
+                print(f'header_size : {header_size}')
+                print(11)
+                
                 message_size = int.from_bytes(header_size, 'big')
-                print(1)
-                print(1)
-                print(1)
-                servermessage = recv_exact_byte.recv_exact_bytes(self.client_socket, message_size)
-                print(1)
-                print(1)
-                print(1)
-                print(1)
+                print(f'messgae_size :- {message_size}')
+                print(111)
+                
+                servermessage = recv_exact_bytes(self.client_socket, message_size)
+                print(f'server_message : {servermessage}')
+                print(1111)
+                
             except OSError as e:
                 if e.winerror == 10053:
                     print('connection closed peacefully...')
@@ -461,8 +483,10 @@ class TorGpChatClient:
         except KeyboardInterrupt:
             print("\nServer stopped manually.")
 
-class RecvExactBytes():
+'''class RecvExactBytes():
     def recv_exact_bytes(self, connection_socket, exact_byte:int):
+
+        print(f'exact_byte :- {exact_byte}')
 
         data = b''
 
@@ -490,7 +514,7 @@ class RecvExactBytes():
         
     
 
-
+'''
 
 
     

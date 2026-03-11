@@ -61,6 +61,8 @@ class Server:
 
                 encrypted_message_size_header = len(encrypted_message).to_bytes(4, 'big')
 
+                print(f'encrypted_message_size_header in bytes : {encrypted_message_size_header} \n len_of encrypted message in int :-{len(encrypted_message)} ')
+
                 if message == 'quit':
                     
                     self.client.sendall(encrypted_message_size_header + encrypted_message)
