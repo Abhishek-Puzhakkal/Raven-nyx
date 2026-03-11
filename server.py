@@ -95,7 +95,8 @@ class Server:
                 
             if not self.running:
                 break
-
+            
+            print(f'header_size :- {header_size}, message_size :- {message_size}, length_client_message = {len(client_message)}') #debugging
             client_message_decrypted = self.proto.decrypt(client_message).decode()
             self.quit_checker = list(client_message_decrypted.split())
             if len(self.quit_checker) == 3 and self.quit_checker[2] == 'quit':
