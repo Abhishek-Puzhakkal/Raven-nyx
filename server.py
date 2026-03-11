@@ -373,10 +373,10 @@ class TorOneToOneServer():
 
             try :
                 recv_exact_byte = RecvExactBytes()
-                header_size = recv_exact_byte.recv_exact_bytes(self.tor_clinet_socket, 4)
+                header_size = recv_exact_byte.recv_exact_bytes((self.tor_clinet_socket), 4)
                 message_size = int.from_bytes(header_size, 'big')
 
-                client_message = recv_exact_byte.recv_exact_bytes(self.tor_clinet_socket, message_size)
+                client_message = recv_exact_byte.recv_exact_bytes((self.tor_clinet_socket), message_size)
             except ConnectionError:
                 print('connection error found....')
                 print('connection is closing...')
