@@ -493,6 +493,9 @@ class TorGpServer():
                     
                     session_key_client = self.tor_clients_socket_session_key_mapping[client]
                     decrypted_client_msg = session_key_client.decrypt(client_message).decode()
+
+                    print('')
+
                     
                     broadcasting_flag = 'broadcasting'
                     
@@ -507,7 +510,12 @@ class TorGpServer():
                                 if clients == sender:
                                     pass
                                 else:
-                                    clients.sendall(session_key.encrypt(broadcasting_message.encode()))
+
+                                    encrypted_message = session_key.encrypt(broadcasting_message.encode())
+
+                                    encrypted_message_size_header = len(encrypted_message).to_bytes(4, 'big')
+
+                                    clients.sendall(encrypted_message_size_header + encrypted_message)
                             
                             client.close()
                             self.tor_clients_socket_session_key_mapping.pop(client)
@@ -522,7 +530,10 @@ class TorGpServer():
                                 if clients == sender:
                                     pass
                                 else:
-                                    clients.sendall(session_key.encrypt(broadcasting_message.encode()))
+                                    encrypted_message = session_key.encrypt(broadcasting_message.encode())
+
+                                    encrypted_message_size_header = len(encrypted_message).to_bytes(4, 'big')   
+                                    clients.sendall(encrypted_message_size_header + encrypted_message)
                                     
                     elif decrypted_client_msg and len(self.tor_clients_socket_session_key_mapping) < 2:
                         self.quict_checker = decrypted_client_msg.split()
@@ -602,9 +613,12 @@ class TorGpServer():
                         
                         break
                     for clients, session_key in self.tor_clients_socket_session_key_mapping.items():
+                        print(f'clinet :- {clients}, session_key :- {session_key}')
                         encrypted_message = session_key.encrypt(server_message_broadcast.encode())
 
                         encrypted_message_size_header = len(encrypted_message).to_bytes(4, 'big')
+
+                        print(f'message header :- {encrypted_message_size_header} \n encrypted_message :- {encrypted_message}')
                             
                         clients.sendall(encrypted_message_size_header + encrypted_message)
                         
