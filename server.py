@@ -76,10 +76,10 @@ class Server:
 
             try :
                 recv_exact_byte = RecvExactBytes()
-                header_size = recv_exact_byte.recv_exact_bytes(self.client, 4)
+                header_size = recv_exact_byte.recv_exact_bytes((self.client), 4 ,)
                 message_size = int.from_bytes(header_size, 'big')
 
-                client_message = recv_exact_byte.recv_exact_bytes(self.client, message_size)
+                client_message = recv_exact_byte.recv_exact_bytes((self.client), message_size,)
             except ConnectionError:
                 print('connection error found ....')
                 print('connection closiing...')
