@@ -57,13 +57,17 @@ class Server:
             if not self.running:
              break
             if message:
+                encrypted_message = self.proto.encrypt(self.serv_message.encode())
+
+                encrypted_message_size_header = len(encrypted_message).to_bytes(4, 'big')
+
                 if message == 'quit':
                     
-                    self.client.sendall(self.proto.encrypt(self.serv_message.encode()))
+                    self.client.sendall(encrypted_message_size_header + encrypted_message)
                     print('\nyou entered quit , the connection is terminating......', flush=True)
                     self.running = False
                     break
-                self.client.sendall(self.proto.encrypt(self.serv_message.encode()))
+                self.client.sendall(encrypted_message_size_header + encrypted_message)
         
         
     def server_recv_msg(self):
@@ -71,7 +75,16 @@ class Server:
         while self.running:
 
             try :
-                client_message = self.client.recv(1024)
+                recv_exact_byte = RecvExactBytes()
+                header_size = recv_exact_byte.recv_exact_bytes(self.client, 4)
+                message_size = int.from_bytes(header_size, 'big')
+
+                client_message = recv_exact_byte.recv_exact_bytes(self.client, message_size)
+            except ConnectionError:
+                print('connection error found ....')
+                print('connection closiing...')
+                self.running = False
+                break
             except OSError as e :
                 if e.winerror in (10053, 10054):
                     print('The connection closed peacefully...')
@@ -129,7 +142,16 @@ class GroupChatServer:
                     if not self.server_running:
                         break
                     try:
-                        client_message = client.recv(1024)
+                        recv_exact_byte = RecvExactBytes()
+                        header_size = recv_exact_byte.recv_exact_bytes(client, 4)
+                        message_size = int.from_bytes(header_size, 'big')
+
+                        client_message = recv_exact_byte.recv_exact_bytes(client, message_size)
+                    except ConnectionError:
+                        print('connection error found...')
+                        print('connection closing...')
+                        self.server_running = False
+                        break
                     except OSError as e:
                         if e.winerror in (10053, 10054):
                             pass
@@ -241,13 +263,22 @@ class GroupChatServer:
                     if server_message == 'quit':
                         self.server_running = False
                         for clients, session_key in self.clients_socket_session_key_mapping.items():
+
+                            encrypted_message = session_key.encrypt(server_message_broadcast.encode())
+
+                            encrypted_message_size_header = len(encrypted_message).to_bytes(4, 'big')
                             
-                            clients.sendall(session_key.encrypt(server_message_broadcast.encode()))
+                            clients.sendall(encrypted_message_size_header + encrypted_message)
+                            
                         print('you enterd quit , connection going to terminate....')
                         
                         break
                     for clients, session_key in self.clients_socket_session_key_mapping.items():
-                        clients.sendall(session_key.encrypt(server_message_broadcast.encode()))
+                        encrypted_message = session_key.encrypt(server_message_broadcast.encode())
+
+                        encrypted_message_size_header = len(encrypted_message).to_bytes(4, 'big')
+                            
+                        clients.sendall(encrypted_message_size_header + encrypted_message)
         except KeyboardInterrupt:
             print('keyboard interpted....')
         except Exception as e:
@@ -318,26 +349,40 @@ class TorOneToOneServer():
 
             message = input('\nyou : ')
 
-            self.server_message = self.username + ' : ' + message
             if not self.server_running:
                 break
 
             if message:
+                self.server_message = self.username + ' : ' + message
+
+                encrypted_message = self.tor_proto.encrypt(self.server_message.encode())
+
+                encrypted_message_size_header = len(encrypted_message).to_bytes(4, 'big')
 
                 if message == 'quit':
 
-                    self.tor_clinet_socket.sendall(self.tor_proto.encrypt(self.server_message.encode()))
+                    self.tor_clinet_socket.sendall(encrypted_message_size_header + encrypted_message)
                     print('you entered quit , entire connection is closing...')
 
                     self.server_running == False
                     break
-                self.tor_clinet_socket.sendall(self.tor_proto.encrypt(self.server_message.encode()))
+                self.tor_clinet_socket.sendall(encrypted_message_size_header + encrypted_message)
     
     def tor_server_recv_message(self):
          while self.server_running:
 
             try :
-                client_message = self.tor_clinet_socket.recv(1024)
+                recv_exact_byte = RecvExactBytes()
+                header_size = recv_exact_byte.recv_exact_bytes(self.tor_clinet_socket, 4)
+                message_size = int.from_bytes(header_size, 'big')
+
+                client_message = recv_exact_byte.recv_exact_bytes(self.tor_clinet_socket, message_size)
+            except ConnectionError:
+                print('connection error found....')
+                print('connection is closing...')
+                self.server_running = False
+                break
+
             except OSError as e :
                 if e.winerror in (10053, 10054):
                     print('The connection closed peacefully...')
@@ -416,7 +461,18 @@ class TorGpServer():
                     if not self.tor_server_running:
                         break
                     try:
-                        client_message = client.recv(1024)
+                        recv_exact_byte = RecvExactBytes()
+                        header_size = recv_exact_byte.recv_exact_bytes(client, 4)
+                        message_size = int.from_bytes(header_size, 'big')
+
+                        client_message = recv_exact_byte.recv_exact_bytes(client, message_size)
+                    
+                    except ConnectionError:
+                        print('connection error ....')
+                        print('entire connection is closing...')
+                        self.tor_server_running = False
+                        break
+
                     except OSError as e:
                         if e.winerror in (10053, 10054):
                             pass
@@ -524,17 +580,27 @@ class TorGpServer():
 
                 if server_message:
                     server_message_broadcast = tor_server_message_flag + ' ' + self.tor_server_username + ' : '+ server_message
+
                     
                     if server_message == 'quit':
                         self.tor_server_running = False
                         for clients, session_key in self.tor_clients_socket_session_key_mapping.items():
+
+                            encrypted_message = session_key.encrypt(server_message_broadcast.encode())
+
+                            encrypted_message_size_header = len(encrypted_message).to_bytes(4, 'big')
                             
-                            clients.sendall(session_key.encrypt(server_message_broadcast.encode()))
+                            clients.sendall(encrypted_message_size_header + encrypted_message)
                         print('you enterd quit , connection going to terminate....')
                         
                         break
                     for clients, session_key in self.tor_clients_socket_session_key_mapping.items():
-                        clients.sendall(session_key.encrypt(server_message_broadcast.encode()))
+                        encrypted_message = session_key.encrypt(server_message_broadcast.encode())
+
+                        encrypted_message_size_header = len(encrypted_message).to_bytes(4, 'big')
+                            
+                        clients.sendall(encrypted_message_size_header + encrypted_message)
+                        
         except KeyboardInterrupt:
             print('keyboard interpted....')
         except Exception as e:
@@ -554,6 +620,22 @@ class TorGpServer():
         except KeyboardInterrupt:
             print("\nServer stopped manually.")
 
+class RecvExactBytes():
+    def recv_exact_bytes(connection_socket, exact_byte:int):
+
+        data = b''
+
+        while len(data) < exact_byte:
+
+            chunk = connection_socket.recv( exact_byte - len(data))
+
+            if not chunk:
+                raise ConnectionError("Peer disconnected")
+                break
+
+            data += chunk
+        
+        return data
 
 
     

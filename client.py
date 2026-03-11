@@ -48,28 +48,35 @@ class Client:
 
             if message: 
 
+                self.clinet_message = self.username + ' : '+ message
+
+                encrypted_message = self.proto.encrypt(self.clinet_message.encode())
+
+                encrypted_message_size_header = len(encrypted_message).to_bytes(4, 'big')
+
+
                 if not self.running:
                     break
 
                 if message == 'quit':
-                    
-                    self.clinet_message = self.username + ' : '+ message
 
-                    self.client_socket.sendall(self.proto.encrypt(self.clinet_message.encode()))
+                    self.client_socket.sendall(encrypted_message_size_header + encrypted_message)
                     print(f'\nyou entered "quit", connection is terminating....', flush=True)
                     self.running = False
                     
                     break
                          
-                self.clinet_message = self.username + ' : '+ message
-
-                self.client_socket.sendall(self.proto.encrypt(self.clinet_message.encode()))
+                self.client_socket.sendall(encrypted_message_size_header + encrypted_message)
                 
     def client_recv_msg(self):
 
         while self.running:
-            try: 
-                servermessage = self.client_socket.recv(1024)
+            try:
+                recv_exact_byte = RecvExactBytes()
+                header_size = recv_exact_byte.recv_exact_bytes(self.client_socket, 4)
+                message_size = int.from_bytes(header_size, 'big')
+
+                servermessage = recv_exact_byte.recv_exact_bytes(self.client_socket, message_size)
             except OSError as e:
                 if e.winerror == 10053:
                     print('connection closed peacefully...')
@@ -145,14 +152,18 @@ class GpChatClient:
                 
                 if message:
                     msg = self.uername + ' : ' + message
+
+                    encrypted_message = self.proto.encrypt(msg.encode())
+
+                    encrypted_message_size_header = len(encrypted_message).to_bytes(4, 'big')
                     
                     if message == 'quit':
-                        self.client_gp_chat_socket.sendall(self.proto.encrypt(msg.encode()))
+                        self.client_gp_chat_socket.sendall(encrypted_message_size_header + encrypted_message)
                         print('you enterd the "quit", so conection terminating....')
                         self.client_running = False
                         break
 
-                    self.client_gp_chat_socket.sendall(self.proto.encrypt(msg.encode()))
+                    self.client_gp_chat_socket.sendall(encrypted_message_size_header + encrypted_message)
         except KeyboardInterrupt:
             print('keyboard intrepted ....')
         except Exception as e :
@@ -162,7 +173,16 @@ class GpChatClient:
         try:
             while self.client_running:
                 try:
-                    message = self.client_gp_chat_socket.recv(1024)
+                    recv_exact_byte = RecvExactBytes()
+                    header_size = recv_exact_byte.recv_exact_bytes(self.client_gp_chat_socket, 4)
+                    message_size = int.from_bytes(header_size, 'big')
+
+                    message = recv_exact_byte.recv_exact_bytes(self.client_gp_chat_socket, message_size)
+                except ConnectionError:
+                    print('connection error found...')
+                    print('connection closing...')
+                    self.client_running = False
+                    break
                 except OSError as e:
                     if e.winerror in (10053, 10054):
                         pass
@@ -253,9 +273,14 @@ class TorClient():
                 if not self.running:
                     break
                 self.clinet_message = self.username + ' : '+ message
+
+                encrypted_message = self.tor_proto.encrypt(self.clinet_message.encode())
+
+                encrypted_message_size_header = len(encrypted_message).to_bytes(4, 'big')
+
                 if message == 'quit':
 
-                    self.client_socket.sendall(self.tor_proto.encrypt(self.clinet_message.encode()))
+                    self.client_socket.sendall(encrypted_message_size_header + encrypted_message)
                     print(f'\nyou entered "quit", connection is terminating....', flush=True)
                     self.running = False
                     
@@ -267,7 +292,15 @@ class TorClient():
 
         while self.running:
             try: 
-                servermessage = self.client_socket.recv(1024)
+                recv_exact_byte = RecvExactBytes()
+                header_size = recv_exact_byte.recv_exact_bytes(self.client_socket, 4)
+                message_size = int.from_bytes(header_size, 'big')
+
+                servermessage = recv_exact_byte.recv_exact_bytes(self.client_socket, message_size)
+            except ConnectionError:
+                print('empty chunk found...')
+                self.running = False
+                break
             except OSError as e:
                 if e.winerror == 10053:
                     print('connection closed peacefully...')
@@ -336,19 +369,26 @@ class TorGpChatClient:
 
             while self.tor_client_running:
                 message = input('\nyou : ')
+                encrypted_message_size_header = None
                 if not self.tor_client_running:
                     break
                 
                 if message:
                     msg = self.uername + ' : ' + message
+
+                    encrypted_message = self.tor_proto.encrypt(msg.encode())
+
+                    encrypted_message_size_header = len(encrypted_message).to_bytes(4, 'big')
+                    
                     
                     if message == 'quit':
-                        self.tor_client_gp_chat_socket.sendall(self.tor_proto.encrypt(msg.encode()))
+                        self.tor_client_gp_chat_socket.sendall(encrypted_message_size_header + encrypted_message)
                         print('you enterd the "quit", so conection terminating....')
                         self.tor_client_running = False
                         break
 
-                    self.tor_client_gp_chat_socket.sendall(self.tor_proto.encrypt(msg.encode()))
+                    self.tor_client_gp_chat_socket.sendall(encrypted_message_size_header + encrypted_message)
+
         except KeyboardInterrupt:
             print('keyboard intrepted ....')
         except Exception as e :
@@ -358,7 +398,15 @@ class TorGpChatClient:
         try:
             while self.tor_client_running:
                 try:
-                    message = self.tor_client_gp_chat_socket.recv(1024)
+                    recv_exact_byte = RecvExactBytes()
+                    header_size = recv_exact_byte.recv_exact_bytes(self.tor_client_gp_chat_socket, 4)
+                    message_size = int.from_bytes(header_size, 'big')
+
+                    message = recv_exact_byte.recv_exact_bytes(self.tor_client_gp_chat_socket, message_size)
+                except ConnectionError:
+                    print('empty chunk')
+                    self.tor_client_running = False
+                    break
                 except OSError as e:
                     if e.winerror in (10053, 10054):
                         pass
@@ -402,6 +450,23 @@ class TorGpChatClient:
             print('\nthe connection closed peacefully....')
         except KeyboardInterrupt:
             print("\nServer stopped manually.")
+
+class RecvExactBytes():
+    def recv_exact_bytes(connection_socket, exact_byte:int):
+
+        data = b''
+
+        while len(data) < exact_byte:
+
+            chunk = connection_socket.recv( exact_byte - len(data))
+
+            if not chunk:
+                raise ConnectionError("Peer disconnected")
+                break
+
+            data += chunk
+        
+        return data
 
 
 
