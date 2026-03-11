@@ -31,6 +31,7 @@ class Client:
             self.client_socket.sendall(message)
             received = self.client_socket.recv(2048)
             payload = self.proto.read_message(received)
+            print('handshake finished')
 
             
             return True
@@ -71,12 +72,21 @@ class Client:
     def client_recv_msg(self):
 
         while self.running:
-            try:
+            try: #debug
                 recv_exact_byte = RecvExactBytes()
+                print(1)
                 header_size = recv_exact_byte.recv_exact_bytes(self.client_socket, 4)
+                print(1)
+                print(1)
                 message_size = int.from_bytes(header_size, 'big')
-
+                print(1)
+                print(1)
+                print(1)
                 servermessage = recv_exact_byte.recv_exact_bytes(self.client_socket, message_size)
+                print(1)
+                print(1)
+                print(1)
+                print(1)
             except OSError as e:
                 if e.winerror == 10053:
                     print('connection closed peacefully...')
