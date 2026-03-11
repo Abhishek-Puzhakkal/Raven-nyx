@@ -462,8 +462,6 @@ class TorGpChatClient:
 class RecvExactBytes():
     def recv_exact_bytes(self, connection_socket, exact_byte:int):
 
-        print(f'exact_byte :- {exact_byte}')
-
         data = b''
 
         while len(data) < exact_byte:

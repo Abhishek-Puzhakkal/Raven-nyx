@@ -51,20 +51,19 @@ class Server:
     
     def server_snt_msg(self):
         while self.running:
-            message = input('\nyou vvv: ')
-            print('###########')
+            message = input('\nyou : ')
+        
             self.serv_message = self.user_name + ' : ' + message
-            print('###########')
 
             if not self.running:
-             print('iam braked...')
+            
              break
             if message:
                 encrypted_message = self.proto.encrypt(self.serv_message.encode())
 
                 encrypted_message_size_header = len(encrypted_message).to_bytes(4, 'big')
 
-                print(f'encrypted_message_size_header in bytes : {encrypted_message_size_header} \n len_of encrypted message in int :-{len(encrypted_message)} ')
+               
 
                 if message == 'quit':
                     
@@ -85,8 +84,6 @@ class Server:
                 message_size = int.from_bytes(header_size, 'big')
 
                 client_message = recv_exact_byte.recv_exact_bytes(self.client, message_size)
-                '''client_message_decrypted = self.proto.decrypt(client_message).decode()
-                self.quit_checker = list(client_message_decrypted.split())'''
             except ConnectionError:
                 print('connection error found ....')
                 print('connection closiing...')
