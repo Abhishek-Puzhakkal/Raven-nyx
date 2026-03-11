@@ -52,9 +52,12 @@ class Server:
     def server_snt_msg(self):
         while self.running:
             message = input('\nyou : ')
+            print('###########')
             self.serv_message = self.user_name + ' : ' + message
+            print('###########')
 
             if not self.running:
+             print('iam braked...')
              break
             if message:
                 encrypted_message = self.proto.encrypt(self.serv_message.encode())
