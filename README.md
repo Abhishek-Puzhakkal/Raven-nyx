@@ -21,13 +21,13 @@ Currently, Ravennyx is a CLI-based tool. In the future, it will include a TUI bu
 
     systemctl start tor
 
-    git  clone https://github.com/Abhishek-Puzhakkal/ghost_pipe.git
+    git  clone https://github.com/Abhishek-Puzhakkal/Raven-nyx.git
 
-    cd ghost_pipe
+    cd Raven-nyx
 
     python -m venv venv 
 
-    source venv/bin/activate      # Linux
+    source venv/bin/activate      
 
     pip install -r requirements.txt
 
