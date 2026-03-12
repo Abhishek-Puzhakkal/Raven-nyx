@@ -94,7 +94,7 @@ Currently, Ravennyx is a CLI-based tool. In the future, it will include a TUI bu
            CookieAuthentication1
            
   3. always run Tor realted below commands as root
-  4. 
+
   4.after running the tor server based command in you directory , there will be a hidde file '.onion_key.txt'
      if you need to use another onion address next time just delete that file , then you will get new address otherwise the past address 
 
@@ -187,6 +187,8 @@ HOW THE GROUP CHAT : -
 The tor based communication is build on the top of above arcitechture, 
 
 server side 
+
+```
    Ravenyx Server (Python)
         │
         │ 1. Start local socket server
@@ -218,30 +220,32 @@ server side
    abcxyz123456.onion
    (Public onion address shared with client)
 
-   
+```
 
-   Explanation 
+   Explanation :-
 
-  Your Python server runs on port 5000 locally
+  - Your Python server runs on port 5000 locally
 
-  Your program uses port 9051 to control Tor
+  - Your program uses port 9051 to control Tor
 
-   Tor creates an onion service
+  - Tor creates an onion service
 
-  The onion service exposes port 80
+  - The onion service exposes port 80
 
-  Port 80 forwards traffic to your local port 5000
+  - Port 80 forwards traffic to your local port 5000
 
-  So externally people connect to:
+  - So externally people connect to:
 
-  abcxyz123456.onion:80
+     abcxyz123456.onion:80
 
-  but internally it goes to:
+  - but internally it goes to:
 
-  127.0.0.1:5000
+     127.0.0.1:5000
 
 
 client side 
+
+```
 
    Ravenyx Client (Python)
         │
@@ -268,17 +272,19 @@ client side
    abcxyz123456.onion
  (Server onion service)
 
- 
+``` 
 Explanation
 
-Client uses SOCKS proxy on 9050
+  Client uses SOCKS proxy on 9050
 
-Tor sends the traffic through the Tor network
+  Tor sends the traffic through the Tor network
 
-It reaches the onion service
+  It reaches the onion service
 
 
 final flow chart 
+
+```
 
   CLIENT MACHINE 
   ────────────────────────────────
@@ -315,8 +321,10 @@ final flow chart
         ▼
   Encrypted Chat / File Transfer
 
+```
 
-  Port's and	Role in  Ravenyx system
+
+##Port's and	Role in  Ravenyx system
   
 9050 :-	SOCKS proxy used by the client to send traffic into Tor
 9051:-	Tor Control Port used by your program (Stem) to create onion services
