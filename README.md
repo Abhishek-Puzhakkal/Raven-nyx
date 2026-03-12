@@ -33,6 +33,8 @@ Currently, Ravennyx is a CLI-based tool. In the future, it will include a TUI bu
 
 ### USAGE 
 
+   NOTE :- To end a communcation session jusr type "quit"
+
    LAN BASED ONE TO ONE CHAT 
 
     python3 raven_nyx.py listen --port < specify a port for server listening for incoming connection> -u <server username for the chat>
@@ -82,7 +84,7 @@ Currently, Ravennyx is a CLI-based tool. In the future, it will include a TUI bu
                     # To end the chat just type and send 'quit'
 
 
-  ###NOTE ABOUT TOR BASED COMMUNICATION 
+###NOTE ABOUT TOR BASED COMMUNICATION 
   
   1.importent thing is this , when you run tor based command make sure that tor is installed and it is running in you machine , otherwise             it will never work
     use :- systemctl start tor #to start tor
@@ -182,6 +184,146 @@ HOW THE GROUP CHAT : -
   The tool entirely on TCP connection , and  full duplex mode , what is mean by full duplex ???, after the connection any side can sent message , not need to one side to wait until other side to sent message , any side can sent and receive any time , also in group chat at any time new members can add to this chat , This is possible by using Threading , i used Threading in this tool , some threads are running in background , like , senting message , receiving message , adding new clients like that , that why this feel in full duplex 
 
 
+The tor based communication is build on the top of above arcitechture, 
+
+server side 
+   Ravenyx Server (Python)
+        │
+        │ 1. Start local socket server
+        │
+        ▼
+   127.0.0.1:5000
+   (Local TCP server waiting for chat connections)
+        │
+        │ 2. Use Tor Control API
+        │
+        ▼
+   Tor Control Port
+   127.0.0.1:9051
+   (Stem library communicates with Tor daemon)
+        │
+        │ Command sent:
+        │ CREATE ONION SERVICE
+        │
+        ▼
+   Tor daemon creates Onion Service
+        │
+        │ Mapping created
+        │
+        ▼
+   HiddenServicePort 80 → 127.0.0.1:5000
+        │
+        │ Tor generates
+        ▼
+   abcxyz123456.onion
+   (Public onion address shared with client)
+
+   
+
+   Explanation 
+
+  Your Python server runs on port 5000 locally
+
+  Your program uses port 9051 to control Tor
+
+   Tor creates an onion service
+
+  The onion service exposes port 80
+
+  Port 80 forwards traffic to your local port 5000
+
+  So externally people connect to:
+
+  abcxyz123456.onion:80
+
+  but internally it goes to:
+
+  127.0.0.1:5000
+
+
+client side 
+
+   Ravenyx Client (Python)
+        │
+        │ User enters onion address
+        │
+        ▼
+   abcxyz123456.onion:80
+        │
+        │ Client cannot connect directly
+        │
+        ▼
+   SOCKS Proxy
+   127.0.0.1:9050
+   (Tor SOCKS gateway)
+        │
+        │ Tor builds encrypted circuits
+        │
+        ▼
+  Tor Network
+   (Relays + Onion routing)
+        │
+        │ Routed to
+        ▼
+   abcxyz123456.onion
+ (Server onion service)
+
+ 
+Explanation
+
+Client uses SOCKS proxy on 9050
+
+Tor sends the traffic through the Tor network
+
+It reaches the onion service
+
+
+final flow chart 
+
+  CLIENT MACHINE 
+  ────────────────────────────────
+
+  Ravenyx Client
+        │
+        ▼
+  SOCKS Proxy
+  127.0.0.1:9050
+        │
+        ▼
+  Tor Network
+        │
+        ▼
+  abcxyz123456.onion:80
+
+
+  SERVER MACHINE
+  ────────────────────────────────
+
+  Tor daemon
+        │
+        ▼
+  Forward traffic
+  80 → 127.0.0.1:5000
+        │
+        ▼
+  Ravenyx Python Server
+  127.0.0.1:5000
+        │
+        ▼
+  Noise Protocol Handshake
+        │
+        ▼
+  Encrypted Chat / File Transfer
+
+
+  Port's and	Role in  Ravenyx system
+  
+9050 :-	SOCKS proxy used by the client to send traffic into Tor
+9051:-	Tor Control Port used by your program (Stem) to create onion services
+80 :-	External onion service port exposed to clients
+5000 :-	Local Ravenyx server socket where your Python chat server listens
+
+
 ## Architecture
 
 - Built using Python socket, stem, pysocks, noiseprotocol module
@@ -190,7 +332,7 @@ HOW THE GROUP CHAT : -
 - Multi-threaded server design
 - Broadcast-based group messaging
 - Star pattern for group chat
-- tor layer 
+- tor layer for anonymity and for global communcation 
 
 ## Limitations
 
