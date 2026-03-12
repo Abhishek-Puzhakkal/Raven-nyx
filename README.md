@@ -182,11 +182,13 @@ HOW THE GROUP CHAT : -
   if only 2 members is group chat (server and client) it basically work like first description nothing more 
 
   The tool entirely on TCP connection , and  full duplex mode , what is mean by full duplex ???, after the connection any side can sent message , not need to one side to wait until other side to sent message , any side can sent and receive any time , also in group chat at any time new members can add to this chat , This is possible by using Threading , i used Threading in this tool , some threads are running in background , like , senting message , receiving message , adding new clients like that , that why this feel in full duplex 
+  
+
+## The tor based communication is build on the top of above arcitechture, 
 
 
-The tor based communication is build on the top of above arcitechture, 
 
-server side 
+# server side flow chart 
 
 ```
    Ravenyx Server (Python)
@@ -222,7 +224,7 @@ server side
 
 ```
 
-   Explanation :-
+   # Explanation :-
 
   - Your Python server runs on port 5000 locally
 
@@ -243,7 +245,7 @@ server side
      127.0.0.1:5000
 
 
-client side 
+## client side flow chart 
 
 ```
 
@@ -273,7 +275,7 @@ client side
  (Server onion service)
 
 ``` 
-Explanation
+## Explanation
 
   Client uses SOCKS proxy on 9050
 
@@ -282,7 +284,7 @@ Explanation
   It reaches the onion service
 
 
-final flow chart 
+## final flow chart 
 
 ```
 
@@ -324,12 +326,13 @@ final flow chart
 ```
 
 
-##Port's and	Role in  Ravenyx system
-  
+## Port's and	Role in  Ravenyx system
+```  
 9050 :-	SOCKS proxy used by the client to send traffic into Tor
 9051:-	Tor Control Port used by your program (Stem) to create onion services
 80 :-	External onion service port exposed to clients
 5000 :-	Local Ravenyx server socket where your Python chat server listens
+```
 
 
 ## Architecture
