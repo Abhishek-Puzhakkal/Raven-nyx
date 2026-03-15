@@ -89,7 +89,7 @@ class file_reciver():
 
 class LanFilesender():
     def __init__(self, file_path, receiver_addr, port ):
-        self.file_path = file_path
+        self.file_path = file_path[0]
         self.recevier_addr = receiver_addr[0]
         self.port = port[0]
         self.file_sender_socket = socket.socket()
