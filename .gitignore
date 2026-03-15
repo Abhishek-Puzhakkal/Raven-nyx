@@ -4,7 +4,7 @@ __pycache__/
 venv/
 .idea/
 .vscode/
-*_checking.py
+*_checking.*
 hello.txt
 .onion_key.txt
 ghost_pipe.py

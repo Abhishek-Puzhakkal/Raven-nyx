@@ -266,9 +266,9 @@ elif user_input.mode == 'lstn_tr_gp_cht':
 
 
 elif user_input.mode == 'share':
-    ip_validation = IpAddressValidation(user_input.addr)
+    ip_validation = IpAddressValidation()
 
-    if ip_validation.validation():
+    if ip_validation.validation(user_input.addr[0]):
 
         share_file = LanFilesender(user_input.addr, user_input.port, user_input.file)
         share_file.send_file()

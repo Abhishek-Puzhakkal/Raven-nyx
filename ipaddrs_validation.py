@@ -2,7 +2,7 @@ import ipaddress
 
 class IpAddressValidation :
     def __init__(self, private_ip : list):
-        self.ip = private_ip[0]
+        self.ip = private_ip
 
     def validation(self) -> bool:
 
