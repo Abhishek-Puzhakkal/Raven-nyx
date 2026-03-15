@@ -1,7 +1,7 @@
 import argparse
 from client import Client, GpChatClient, TorClient, TorGpChatClient
 from server import Server, GroupChatServer, TorGpServer, TorOneToOneServer
-from file_sharing import file_reciver, File_sender
+from file_sharing import *
 import threading
 from ipaddrs_validation import *
 
@@ -270,11 +270,11 @@ elif user_input.mode == 'share':
 
     if ip_validation.validation():
 
-        share_file = File_sender(user_input.addr, user_input.port, user_input.file)
+        share_file = LanFilesender(user_input.addr, user_input.port, user_input.file)
         share_file.send_file()
     else : print(f'{user_input.addr[0]} is not an private ip ')
 elif user_input.mode == 'accept_file':
-    recv_file = file_reciver(user_input.path, user_input.port)
+    recv_file = LanFileReceiver(user_input.path, user_input.port)
     recv_file.recvfile()
 
 
