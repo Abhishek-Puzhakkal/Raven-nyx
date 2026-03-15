@@ -133,7 +133,7 @@ class LanFilesender():
             print(f'digithal figerprinting completed...')
             print(f'digital figer print :-  {sha256_hash}')
 
-            file_size = file_path.stat().st_size()
+            file_size = file_path.stat().st_size
 
             file_sending_header = {
 
