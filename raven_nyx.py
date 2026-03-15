@@ -153,9 +153,9 @@ if user_input.mode == 'listen':
         
 elif user_input.mode == 'connect':
 
-    ip_validation = IpAddressValidation(user_input.addr)
+    ip_validation = IpAddressValidation()
 
-    if ip_validation.validation():
+    if ip_validation.validation(user_input.addr):
 
         client = Client(user_input.addr, user_input.port, user_input.u)
         connection_result = client.clinet_server_connection()
@@ -173,9 +173,9 @@ elif user_input.mode == 'connect':
 
 elif user_input.mode == 'connect-groupchat':
 
-    ip_validation = IpAddressValidation(user_input.addr)
+    ip_validation = IpAddressValidation()
 
-    if ip_validation.validation():
+    if ip_validation.validation(user_input.addr):
 
         gp_cht_client = GpChatClient(user_input.addr, user_input.port, user_input.u)
 
@@ -268,9 +268,9 @@ elif user_input.mode == 'lstn_tr_gp_cht':
 elif user_input.mode == 'share':
     ip_validation = IpAddressValidation()
 
-    if ip_validation.validation(user_input.addr[0]):
+    if ip_validation.validation(user_input.addr):
 
-        share_file = LanFilesender(user_input.addr, user_input.port, user_input.file)
+        share_file = LanFilesender(user_input.file, user_input.addr, user_input.port)
         share_file.send_file()
     else : print(f'{user_input.addr[0]} is not an private ip ')
 elif user_input.mode == 'accept_file':
