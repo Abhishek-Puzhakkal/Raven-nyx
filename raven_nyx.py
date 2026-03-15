@@ -275,7 +275,7 @@ elif user_input.mode == 'share':
     else : print(f'{user_input.addr[0]} is not an private ip ')
 elif user_input.mode == 'accept_file':
     recv_file = LanFileReceiver(user_input.path, user_input.port)
-    recv_file.recvfile()
+    recv_file.recv_file()
 
 
 
