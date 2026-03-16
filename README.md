@@ -27,6 +27,15 @@ Currently, Ravennyx is a CLI-based tool. In the future, it will include a TUI bu
 
     systemctl start tor
 
+    # also you must commentout two lines that metioned below from the file  /etc/tor/torrc
+    
+           ControlPort 9051
+           CookieAuthentication1
+           
+    # then restart tor 
+
+        systemctl restart tor 
+
     git  clone https://github.com/Abhishek-Puzhakkal/Raven-nyx.git
 
     cd Raven-nyx
