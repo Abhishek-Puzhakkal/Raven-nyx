@@ -164,7 +164,9 @@ class LanFilesender():
                     p_bar = tqdm(total=file_size, unit='B', unit_scale=True)
 
                     while chunk := file.read(64 * 1024):
-                        self.file_sender_socket.sendall(self.session_key.encrypt(chunk))
+                        encrypted_chunk = self.session_key.encrypt(chunk)
+                        encrypted_chunk_size = len(encrypted_chunk).to_bytes(2, 'big')
+                        self.file_sender_socket.sendall(encrypted_chunk_size + encrypted_chunk)
                         print(f'chunk = {chunk} \n len = {len(chunk)}')
                         p_bar.update(len(chunk))
                     p_bar.close()
@@ -289,9 +291,11 @@ class LanFileReceiver():
 
                         remaing = file_size - received_chunk_size
 
-                        recv_chunk_size = min(64 * 1024, remaing)
+                        chunk_size = recv_exact_byte.recv_exact_bytes(client_socket, 4)
 
-                        encrypted_chunk = client_socket.recv(recv_chunk_size)
+                        recv_chunk_size = min(64 * 1024, int.from_bytes(chunk_size, 'big'))
+
+                        encrypted_chunk = recv_exact_byte.recv_exact_bytes(client_socket, received_chunk_size)
 
                         print(f'encrypted_chunk :- {encrypted_chunk}')
                         decrypted_chunk = self.session_key.decrypt(encrypted_chunk)
