@@ -103,6 +103,8 @@ Currently, Ravennyx is a CLI-based tool. In the future, it will include a TUI bu
 
 
 ## NOTE ABOUT TOR BASED COMMUNICATION 
+
+```
   
   1.importent thing is this , when you run tor based command make sure that tor is installed and it is running in you machine , otherwise             it will never work
     use :- systemctl start tor #to start tor
@@ -110,12 +112,15 @@ Currently, Ravennyx is a CLI-based tool. In the future, it will include a TUI bu
   2.also you must commentout two lines that metioned below from file  /etc/tor/torrc
            ControlPort 9051
            CookieAuthentication1
+      then restart tor 
+
+        systemctl restart tor 
            
   3. always run Tor realted below commands as root
 
   4.after running the tor server based command in you directory , there will be a hidde file '.onion_key.txt'
      if you need to use another onion address next time just delete that file , then you will get new address otherwise the past address 
-
+```
   ## TOR BASED ONE TO ONE COMMUNICATION
 
   # server command 
@@ -167,7 +172,7 @@ Currently, Ravennyx is a CLI-based tool. In the future, it will include a TUI bu
                                         
   ## FILE SHARING
 
-  # FILE RECEIVER COMMAND 
+  # LAN FILE RECEIVER COMMAND 
 
   ```
 
@@ -185,7 +190,7 @@ Currently, Ravennyx is a CLI-based tool. In the future, it will include a TUI bu
   ```
     
                 
-  # FILE SENDER COMMAND
+  # LAN FILE SENDER COMMAND
 
   ```
 
@@ -201,6 +206,36 @@ Currently, Ravennyx is a CLI-based tool. In the future, it will include a TUI bu
   
   if the file, that need to send , is in same directory just specify the name of the file , otherwise full path is needed
   ```
+
+# TOR FILE SENDER COMMAND
+
+```
+python3 raven_nyx.py tr-share --file < path of the sending file > --addr <recevier onion address >  
+
+eg:- python3 raven_nyx.py tr-share --file hello.txt --addr m5yq2k7x3v4t6p9n8r1s2u3w4x5y6z7a8b9c2d3e4f5g6h7i8j9k2l3.onion
+
+     #or 
+
+python3 raven_nyx.py share --file /home/kali/project/ghost_pipe/hello.txt --addr m5yq2k7x3v4t6p9n8r1s2u3w4x5y6z7a8b9c2d3e4f5g6h7i8j9k2l3.onion
+
+note:- if the file, that need to send , is in same directory just specify the name of the file , otherwise full path is needed
+
+```
+
+# TOR FILE RECEIVER COMMAND 
+
+```
+python3 raven_nyx.py tr-accept-file --path < specify a path to save the file >
+
+eg :-  python3 raven_nyx.py tr-accept-file --path received_file.txt
+
+        #or
+
+        python3 raven_nyx.py tr-accept-file --path /home/kali/testing/received_file.txt
+
+        note :- if the received file need to save the same directory , just specify the file name , other wise full path is needed 
+```
+
   
 
 ### HOW THIS TOOL BASICALLY WORK 
