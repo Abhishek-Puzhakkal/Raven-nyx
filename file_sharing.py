@@ -315,6 +315,7 @@ class LanFileReceiver():
                 if sha256_hash.hexdigest() == checksum:
 
                     print(f'\nRecalculated_checksum :- {sha256_hash.hexdigest()}\nChecksum matches')
+                    print('File received successfully...')
                     response_flag = self.session_key.encrypt('FILE_DOWNLOADED_SUCCESSFULLY'.encode())
                     response_flag_size = len(response_flag).to_bytes(2, 'big')
                     client_socket.sendall(response_flag_size + response_flag)
