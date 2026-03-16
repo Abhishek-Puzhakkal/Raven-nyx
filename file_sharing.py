@@ -6,6 +6,7 @@ from tqdm import tqdm
 from server import RecvExactBytes
 import hashlib
 from itertools import cycle
+import json
 
 class File_sender():
     def __init__(self, addr, port, file_path):
@@ -142,7 +143,7 @@ class LanFilesender():
 
             }
 
-            encrypted_file_sending_header = self.session_key.encrypt(file_sending_header.encode())
+            encrypted_file_sending_header = self.session_key.encrypt(json.dumps(file_sending_header).encode())
             len_encrypted_file_sending_header = len(encrypted_file_sending_header).to_bytes(2, 'big')
 
             self.file_sender_socket.sendall(len_encrypted_file_sending_header + encrypted_file_sending_header)
@@ -259,7 +260,7 @@ class LanFileReceiver():
 
             encrypted_file_header = recv_exact_byte.recv_exact_bytes(client_socket, int.from_bytes(file_header_size,'big'))
 
-            file_header = self.session_key.decrypt(encrypted_file_header).decode()
+            file_header = json.loads(self.session_key.decrypt(encrypted_file_header).decode())
 
             file_size = file_header['file_size']
             checksum = file_header['checksum']
