@@ -75,15 +75,65 @@ command = argparse.ArgumentParser(description="     Ravenyx is a secure peer-to-
 
                     #Above mentioned onion address is just a demo one , not a real one
                            
-            FILE SHARING
+            LAN ONE TO ONE FILE SHARING
 
                 FILE RECEVER COMMAND 
 
                     raven_nyx.py accept_file --port <specify a port for sender to connect> --path < specify a path to save the file >
+
+                    eg :-  raven_nyx.py accept_file --port 1234 --path received_file.txt
+
+                            #or
+
+                        raven_nyx.py accept_file --port 1234 --path /home/kali/testing/received_file.txt
+
+                        note :- if the received file need to save the same directory , just specify the file name , other wise full path is needed 
+
                 
                 FILE SENDER COMMAND 
 
                     raven_nyx.py share --file < path of the sending file > --addr < internal ip of recever > --port < listening port of receiver > 
+
+                    eg:- raven_nyx.py share --file hello.txt --addr 192.168.1.3 --port 1234
+
+                            #or 
+
+                        raven_nyx.py share --file /home/kali/project/ghost_pipe/hello.txt --addr 192.168.1.3 --port 1234
+
+                        note:- if the file, that need to send , is in same directory just specify the name of the file , otherwise full path is needed
+
+            
+            TOR ONE TO ONE FILE SHARING
+
+                 FILE RECEVER COMMAND 
+
+                    raven_nyx.py tr-accept-file --path < specify a path to save the file >
+
+                    eg :-  raven_nyx.py tr-accept-file --path received_file.txt
+
+                            #or
+
+                        raven_nyx.py tr-accept-file --path /home/kali/testing/received_file.txt
+
+                        note :- if the received file need to save the same directory , just specify the file name , other wise full path is needed 
+
+
+                
+                FILE SENDER COMMAND 
+
+                    raven_nyx.py tr-share --file < path of the sending file > --addr <recevier onion address >  
+
+                    eg:- raven_nyx.py tr-share --file hello.txt --addr m5yq2k7x3v4t6p9n8r1s2u3w4x5y6z7a8b9c2d3e4f5g6h7i8j9k2l3.onion
+
+                            #or 
+
+                        raven_nyx.py share --file /home/kali/project/ghost_pipe/hello.txt --addr m5yq2k7x3v4t6p9n8r1s2u3w4x5y6z7a8b9c2d3e4f5g6h7i8j9k2l3.onion
+
+                        note:- if the file, that need to send , is in same directory just specify the name of the file , otherwise full path is needed
+
+                    
+                
+                
 
                 
             Author :- Abhishek Puzhakkal
