@@ -139,7 +139,7 @@ class LanFilesender():
             file_sending_header = {
 
                 'file_size' : file_size,
-                'checksum' : sha256_hash
+                'checksum' : sha256_hash.hexdigest()
 
             }
 
@@ -310,7 +310,7 @@ class LanFileReceiver():
                         
                         sha256_hash.update(data)
 
-                if sha256_hash == checksum:
+                if sha256_hash.hexdigest() == checksum:
 
                     print('checksum correct ')
                     response_flag = self.session_key.encrypt('FILE_DOWNLOADED_SUCCESSFULLY'.encode())
