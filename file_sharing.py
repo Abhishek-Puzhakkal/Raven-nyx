@@ -104,7 +104,7 @@ class LanFilesender():
         if file_path.exists():
 
             self.file_sender_socket.connect((self.recevier_addr, self.port))
-            print('connection successfull... \n handshake starting....')
+            print('\nconnection successfull... \n handshake starting....')
             self.session_key.set_as_initiator()
             self.session_key.start_handshake()
             message = self.session_key.write_message()
@@ -119,7 +119,7 @@ class LanFilesender():
 
             payload = self.session_key.read_message(received_message)
 
-            print(f'handshake finished...\nstarting digital figerprinting of  {self.file_path}')
+            print(f'\nhandshake finished...\n creating checksum of   {self.file_path}')
             sha256_hash = hashlib.sha256()
 
             with open(file_path, 'rb') as file:
@@ -130,8 +130,7 @@ class LanFilesender():
                     
                     sha256_hash.update(data)
             
-            print(f'digithal figerprinting completed...')
-            print(f'digital figer print :-  {sha256_hash.hexdigest()}')
+            print(f'\nchecksum :-  {sha256_hash.hexdigest()}')
 
             file_size = file_path.stat().st_size
 
@@ -155,7 +154,7 @@ class LanFilesender():
 
             if 'FILE_HEADER_GOT_SUCCESSFULLY' == self.session_key.decrypt(response_flag).decode():
 
-                print('file sending...')
+                print('\nfile sending...')
 
                 with open(file_path, 'rb') as file:
                     p_bar = tqdm(total=file_size, unit='B', unit_scale=True, desc='Sending')
@@ -167,9 +166,9 @@ class LanFilesender():
                         p_bar.update(len(chunk))
                     p_bar.close()
                         
-                print('file sending completed ...')
+                print('\nfile sending completed ...')
 
-                print('waiting for client verification...')
+                print('\nwaiting for client verification...')
                 response_flag_size = recv_exact_byte.recv_exact_bytes(self.file_sender_socket, 2)
 
                 response_flag_size_int_form = int.from_bytes(response_flag_size,'big')
@@ -177,18 +176,18 @@ class LanFilesender():
                 response_flag = recv_exact_byte.recv_exact_bytes(self.file_sender_socket, response_flag_size_int_form)
 
                 if 'FILE_DOWNLOADED_SUCCESSFULLY' == self.session_key.decrypt(response_flag).decode():
-                    print('client verification successfull, file sended successfully ...')
+                    print('\nclient verification successfull, file sended and recevied successfully ...')
                     self.file_sender_socket.close()
                 else:
-                    print('something went wrong...')
-                    print('client failed while verifying the checksum, checksum missmatch occured ... \n please repeat the filesharing..')
+                    print('\nsomething went wrong...')
+                    print('\nclient failed while verifying the checksum, checksum missmatch occured ... \n please repeat the filesharing..')
                     self.file_sender_socket.close()
             
             else:
-                print('something went wrong...')
+                print('\nsomething went wrong...')
                 self.file_sender_socket.close()
         else:
-            print(f'{self.file_path} not exists...')
+            print(f'\n{self.file_path} not exists...')
 
 
 class LanFileReceiver():
@@ -233,7 +232,7 @@ class LanFileReceiver():
 
             client_socket , addr = self.file_recevier_socket.accept()
 
-            print(f'{addr} connected successfully...\n handshake initialising...')
+            print(f'\n{addr} connected successfully...\n handshake initialising...')
 
             self.session_key.set_as_responder()
             self.session_key.start_handshake()
@@ -266,7 +265,7 @@ class LanFileReceiver():
             file_size = file_header['file_size']
             
             checksum = file_header['checksum']
-            print(f'file_size : { file_size} \n checksum = {checksum}')
+            print(f'\nsender given metadata  file_size_in_bytes : { file_size}   checksum = {checksum}')
 
             if file_size and checksum:
                 response_flag = self.session_key.encrypt('FILE_HEADER_GOT_SUCCESSFULLY'.encode())
@@ -301,7 +300,7 @@ class LanFileReceiver():
                     
                     p_bar.close()
                 
-                print('file received ...\n checking cheksum match...')
+                print('\nfile received ...\n Recalculating checksum of received file ...')
 
                 sha256_hash = hashlib.sha256()
 
@@ -315,7 +314,7 @@ class LanFileReceiver():
 
                 if sha256_hash.hexdigest() == checksum:
 
-                    print('checksum correct ')
+                    print(f'\nRecalculated_checksum :- {sha256_hash.hexdigest()}\nChecksum matches')
                     response_flag = self.session_key.encrypt('FILE_DOWNLOADED_SUCCESSFULLY'.encode())
                     response_flag_size = len(response_flag).to_bytes(2, 'big')
                     client_socket.sendall(response_flag_size + response_flag)
@@ -325,9 +324,9 @@ class LanFileReceiver():
                     response_flag = self.session_key.encrypt('FILE_DOWNLOADED_UNSUCCESSFULLY'.encode())
                     response_flag_size = len(response_flag).to_bytes(2, 'big')
                     client_socket.sendall(response_flag_size + response_flag)
-                    print('somthing went wrong... \n checksum missmatch...')
-                    print(f'sender given checksum :- {checksum}')
-                    print(f'received file checksum :- {sha256_hash} \n please resume the program ')
+                    print('\nSomthing went wrong... \n Checksum missmatch...')
+                    print(f'\nsender given checksum :- {checksum}')
+                    print(f'\nreceived file checksum :- {sha256_hash.hexdigest()} \n please resume the program ')
                     client_socket.close()
                     self.file_recevier_socket.close()
 
