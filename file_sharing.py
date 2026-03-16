@@ -263,7 +263,9 @@ class LanFileReceiver():
             file_header = json.loads(self.session_key.decrypt(encrypted_file_header).decode())
 
             file_size = file_header['file_size']
+            
             checksum = file_header['checksum']
+            print(f'file_size : { file_size} \n checksum = {checksum}')
 
             if file_size and checksum:
                 response_flag = self.session_key.encrypt('FILE_HEADER_GOT_SUCCESSFULLY'.encode())
@@ -292,7 +294,7 @@ class LanFileReceiver():
 
                         file.write(decrypted_chunk)
 
-                        received_chunk_size += len(decrypted_chunk.decode())
+                        received_chunk_size += len(decrypted_chunk)
 
                         p_bar.update(received_chunk_size)
                     
