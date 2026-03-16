@@ -163,6 +163,7 @@ class LanFilesender():
 
                     while chunk := file.read(64 * 1024):
                         self.file_sender_socket.sendall(self.session_key.encrypt(chunk))
+                        print(f'chunk = {chunk} \n len = {len(chunk)}')
                         p_bar.update(len(chunk))
                     p_bar.close()
                         
@@ -286,15 +287,21 @@ class LanFileReceiver():
 
                         recv_chunk_size = min(64 * 1024, remaing)
 
-                        decrypted_chunk = self.session_key.decrypt(client_socket.recv(recv_chunk_size))
+                        encrypted_chunk = client_socket.recv(recv_chunk_size)
 
-                        if not decrypted_chunk:
+                        print(f'encrypted_chunk :- {encrypted_chunk}')
+                        decrypted_chunk = self.session_key.decrypt(encrypted_chunk)
+                        print(f'decrypted_chunk :- {decrypted_chunk}')
+
+                        if not encrypted_chunk:
                             break
 
 
                         file.write(decrypted_chunk)
 
                         received_chunk_size += len(decrypted_chunk)
+
+                        print(f'received_chunk_size { received_chunk_size}')
 
                         p_bar.update(received_chunk_size)
                     
