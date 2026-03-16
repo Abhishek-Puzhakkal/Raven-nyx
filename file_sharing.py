@@ -437,11 +437,10 @@ class TorFilesender():
 
 
 class TorFileReceiver():
-    def __init__(self, file_path, port):
+    def __init__(self, file_path):
         self.key_path = Path('.onion_key.txt')
         self.tor_controller = Controller.from_port()
         self.file_path = file_path[0]
-        self.port = port[0]
         self.file_recevier_socket = socket.socket()
         self.session_key = NoiseConnection.from_name(b'Noise_NN_25519_ChaChaPoly_SHA256')
 

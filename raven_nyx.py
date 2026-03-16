@@ -112,6 +112,13 @@ accept_file_command = sub_command.add_parser('accept_file', help='This is the co
 accept_file_command.add_argument('--path',required=True, nargs=1 , metavar='file path', help='specify a path to save the receiving file')
 accept_file_command.add_argument('--port', required=True, nargs=1, type=int, metavar='port number', help='specify a portnumber to listen for incomming connection')
 
+tor_share_file_command = sub_command.add_parser('tr-share', help='send file through tor ')
+tor_share_file_command.add_argument('--file', nargs=1, required=True, metavar='file path', help='The path of the file to send')
+tor_share_file_command.add_argument('--addr', required=True, nargs=1, metavar='receiver onion address', help='receiver onion address')
+
+tor_accept_file_command = sub_command.add_parser('tr-accept-file', help='receiver to get file through tor network')
+tor_accept_file_command.add_argument('--path',required=True, nargs=1 , metavar='file path', help='specify a path to save the receiving file')
+
 connect_group_chat = sub_command.add_parser('connect-groupchat', help='Client command to connect to group chat ')
 connect_group_chat.add_argument('--addr', required=True, nargs=1, type=str, metavar='private ip ', help='private ip of server')
 connect_group_chat.add_argument('--port', type=int, required=True, nargs=1, metavar='port number', help='listeing port of server')
@@ -275,6 +282,13 @@ elif user_input.mode == 'share':
     else : print(f'{user_input.addr[0]} is not an private ip ')
 elif user_input.mode == 'accept_file':
     recv_file = LanFileReceiver(user_input.path, user_input.port)
+    recv_file.recv_file()
+
+elif user_input.mode == 'tr-share':
+    share_file = TorFilesender(user_input.file, user_input.addr)
+    share_file.send_file()
+elif user_input.mode == 'tr-accept-file':
+    recv_file = TorFileReceiver(user_input.path)
     recv_file.recv_file()
 
 
