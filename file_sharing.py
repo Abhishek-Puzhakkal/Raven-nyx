@@ -119,10 +119,7 @@ class LanFilesender():
 
             payload = self.session_key.read_message(received_message)
 
-            print(f'handshake finished...\n  handshke_hash = {self.session_key.get_handshake_hash()}')
-            print(f"Encrypt Key: {self.session_key.get_encryptor()}")
-            print(f"Decrypt Key: {self.session_key.decryptor.k.hex()} \n starting digital figerprinting of  {self.file_path}")
-
+            print(f'handshake finished...\n  handshke_hash = {self.session_key.get_handshake_hash()}\n starting digital figerprinting of  {self.file_path}')
             sha256_hash = hashlib.sha256()
 
             with open(file_path, 'rb') as file:
@@ -260,8 +257,6 @@ class LanFileReceiver():
                     plaintext = self.session_key.read_message(received_message)                
 
             print(f'handshake finished... \n handshke_hash = {self.session_key.get_handshake_hash()}')
-            print(f"Encrypt Key: {self.session_key.encryptor.k.hex()}")
-            print(f"Decrypt Key: {self.session_key.decryptor.k.hex()}")
 
             file_header_size = recv_exact_byte.recv_exact_bytes(client_socket, 2)
 
