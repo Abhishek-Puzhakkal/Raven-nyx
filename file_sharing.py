@@ -132,7 +132,7 @@ class LanFilesender():
                     sha256_hash.update(data)
             
             print(f'digithal figerprinting completed...')
-            print(f'digital figer print :-  {sha256_hash}')
+            print(f'digital figer print :-  {sha256_hash.hexdigest()}')
 
             file_size = file_path.stat().st_size
 
