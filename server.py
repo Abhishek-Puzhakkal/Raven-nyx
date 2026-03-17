@@ -26,7 +26,7 @@ class Server:
             self.server.listen()
 
             self.client, clinet_addr = self.server.accept()
-
+            recv_exact_byte = RecvExactBytes()
             self.proto = NoiseConnection.from_name(b'Noise_NN_25519_ChaChaPoly_SHA256')
             self.proto.set_as_responder()
             self.proto.start_handshake()
@@ -36,9 +36,12 @@ class Server:
                     break
                 elif action == 'send':
                     ciphertext = self.proto.write_message()
-                    self.client.sendall(ciphertext)
+                    ciphertext_size = len(ciphertext).to_bytes(4,'big')
+                    self.client.sendall(ciphertext_size + ciphertext)
                 elif action == 'receive':
-                    data = self.client.recv(2048)
+                    received_message_header = recv_exact_byte.recv_exact_bytes(self.client, 4)
+                    header_size = int.from_bytes(received_message_header, 'big')
+                    data = recv_exact_byte.recv_exact_bytes(self.client, header_size)
                     plaintext = self.proto.read_message(data)
 
             return self.client, clinet_addr
@@ -234,23 +237,27 @@ class GroupChatServer:
                 if not self.server_running:
                     break
                 if clients_socket not in self.clients_socket_session_key_mapping:
+                    recv_exact_byte = RecvExactBytes()
                     print(f'\nnew connection arrived , {clients_addr} ')
-                    noise = NoiseConnection.from_name(b'Noise_NN_25519_ChaChaPoly_SHA256')
-                    noise.set_as_responder()
-                    noise.start_handshake()
+                    session_key = NoiseConnection.from_name(b'Noise_NN_25519_ChaChaPoly_SHA256')
+                    session_key.set_as_responder()
+                    session_key.start_handshake()
 
-                    # Perform handshake. Break when finished
+                    
                     for action in cycle(['receive', 'send']):
-                        if noise.handshake_finished:
+                        if session_key.handshake_finished:
                             break
                         elif action == 'send':
-                            ciphertext = noise.write_message()
-                            clients_socket.sendall(ciphertext)
+                            ciphertext = session_key.write_message()
+                            ciphertext_size = len(ciphertext).to_bytes(4, 'big')
+                            clients_socket.sendall(ciphertext_size + ciphertext)
                         elif action == 'receive':
-                            data = clients_socket.recv(2048)
-                            plaintext = noise.read_message(data)
+                            recevied_message_header = recv_exact_byte.recv_exact_bytes(clients_socket, 4)
+                            header_size = int.from_bytes(recevied_message_header,'big')
+                            data = recv_exact_byte.recv_exact_bytes(clients_socket, header_size)
+                            plaintext = session_key.read_message(data)
                     
-                    self.clients_socket_session_key_mapping[clients_socket] = noise
+                    self.clients_socket_session_key_mapping[clients_socket] = session_key
                     threading.Thread(target=server_brodcast, args=(clients_socket,)).start()
                     
     def gp_srvr_snt_msg(self):
@@ -335,15 +342,17 @@ class TorOneToOneServer():
         self.tor_proto = NoiseConnection.from_name(b'Noise_NN_25519_ChaChaPoly_SHA256')
         self.tor_proto.set_as_responder()
         self.tor_proto.start_handshake()
-
+        recv_ext_byt = RecvExactBytes()
         for action in cycle(['receive', 'send']):
             if self.tor_proto.handshake_finished:
                 break
             elif action == 'send':
                 ciphertext = self.tor_proto.write_message()
-                self.tor_clinet_socket.sendall(ciphertext)
+                ciphertext_size = len(ciphertext).to_bytes(4, 'big')
+                self.tor_clinet_socket.sendall(ciphertext_size + ciphertext)
             elif action == 'receive':
-                data = self.tor_clinet_socket.recv(2048)
+                recv_msg_hdr = recv_ext_byt.recv_exact_bytes(self.tor_clinet_socket, 4)
+                data = recv_ext_byt.recv_exact_bytes(self.tor_clinet_socket, int.from_bytes(recv_msg_hdr, 'big'))
                 plaintext = self.tor_proto.read_message(data)
 
         return clinet_addr
@@ -570,22 +579,24 @@ class TorGpServer():
                     break
                 if clients_socket not in self.tor_clients_socket_session_key_mapping:
                     print(f'\nnew connection arrived , {clients_addr} ')
-                    noise = NoiseConnection.from_name(b'Noise_NN_25519_ChaChaPoly_SHA256')
-                    noise.set_as_responder()
-                    noise.start_handshake()
+                    session_key = NoiseConnection.from_name(b'Noise_NN_25519_ChaChaPoly_SHA256')
+                    session_key.set_as_responder()
+                    session_key.start_handshake()
 
-                    # Perform handshake. Break when finished
+                    recv_ext_byt = RecvExactBytes()
                     for action in cycle(['receive', 'send']):
-                        if noise.handshake_finished:
+                        if session_key.handshake_finished:
                             break
                         elif action == 'send':
-                            ciphertext = noise.write_message()
-                            clients_socket.sendall(ciphertext)
+                            ciphertext = session_key.write_message()
+                            ciphertext_size = len(ciphertext).to_bytes(4, 'big')
+                            clients_socket.sendall(ciphertext_size + ciphertext)
                         elif action == 'receive':
-                            data = clients_socket.recv(2048)
-                            plaintext = noise.read_message(data)
+                            recv_msg_header = recv_ext_byt.recv_exact_bytes(clients_socket, 4)
+                            data = recv_ext_byt.recv_exact_bytes(clients_socket, int.from_bytes(recv_msg_header,'big'))
+                            plaintext = session_key.read_message(data)
                     
-                    self.tor_clients_socket_session_key_mapping[clients_socket] = noise
+                    self.tor_clients_socket_session_key_mapping[clients_socket] = session_key
                     threading.Thread(target=tor_server_brodcast, args=(clients_socket,)).start()
                     
     def tor_gp_srvr_snt_msg(self):
@@ -651,8 +662,9 @@ class RecvExactBytes():
                 chunk = connection_socket.recv( exact_byte - len(data))
 
                 if not chunk:
+                    
                     raise ConnectionError("Peer disconnected")
-                    break
+                    
 
                 data += chunk
             except Exception as e:

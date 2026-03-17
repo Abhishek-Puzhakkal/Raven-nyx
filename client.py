@@ -27,9 +27,12 @@ class Client:
             self.proto = NoiseConnection.from_name(b'Noise_NN_25519_ChaChaPoly_SHA256')
             self.proto.set_as_initiator()
             self.proto.start_handshake()
+            recv_ext_byt = RecvExactBytes()
             message = self.proto.write_message()
-            self.client_socket.sendall(message)
-            received = self.client_socket.recv(2048)
+            message_size = len(message).to_bytes(4, 'big')
+            self.client_socket.sendall(message_size + message)
+            recv_msg_header = recv_ext_byt.recv_exact_bytes(self.client_socket, 4)
+            received = recv_ext_byt.recv_exact_bytes(self.client_socket, int.from_bytes(recv_msg_header, 'big'))
             payload = self.proto.read_message(received)
             print('handshake finished')
 
@@ -72,7 +75,7 @@ class Client:
     def client_recv_msg(self):
 
         while self.running:
-            try: #debug
+            try: 
                 recv_exact_byte = RecvExactBytes()
                 
                 header_size = recv_exact_byte.recv_exact_bytes(self.client_socket, 4)
@@ -142,9 +145,12 @@ class GpChatClient:
             self.proto = NoiseConnection.from_name(b'Noise_NN_25519_ChaChaPoly_SHA256')
             self.proto.set_as_initiator()
             self.proto.start_handshake()
+            recv_ext_byt = RecvExactBytes()
             message = self.proto.write_message()
-            self.client_gp_chat_socket.sendall(message)
-            received = self.client_gp_chat_socket.recv(2048)
+            message_size = len(message).to_bytes(4, 'big')
+            self.client_gp_chat_socket.sendall(message_size + message)
+            recv_msg_header = recv_ext_byt.recv_exact_bytes(self.client_gp_chat_socket, 4)
+            received = recv_ext_byt.recv_exact_bytes(self.client_gp_chat_socket, int.from_bytes(recv_msg_header, 'big'))
             payload = self.proto.read_message(received)
             return True
         except Exception as e :
@@ -257,9 +263,12 @@ class TorClient():
             self.tor_proto = NoiseConnection.from_name(b'Noise_NN_25519_ChaChaPoly_SHA256')
             self.tor_proto.set_as_initiator()
             self.tor_proto.start_handshake()
+            recv_ext_byt = RecvExactBytes()
             message = self.tor_proto.write_message()
-            self.client_socket.sendall(message)
-            received = self.client_socket.recv(2048)
+            message_size = len(message).to_bytes(4, 'big')
+            self.client_socket.sendall(message_size + message)
+            recv_msg_header = recv_ext_byt.recv_exact_bytes(self.client_socket, 4)
+            received = recv_ext_byt.recv_exact_bytes(self.client_socket, int.from_bytes(recv_msg_header, 'big'))
             payload = self.tor_proto.read_message(received)
 
             
@@ -364,9 +373,11 @@ class TorGpChatClient:
             self.tor_proto = NoiseConnection.from_name(b'Noise_NN_25519_ChaChaPoly_SHA256')
             self.tor_proto.set_as_initiator()
             self.tor_proto.start_handshake()
+            recv_ext_byt = RecvExactBytes()
             message = self.tor_proto.write_message()
-            self.tor_client_gp_chat_socket.sendall(message)
-            received = self.tor_client_gp_chat_socket.recv(2048)
+            self.tor_client_gp_chat_socket.sendall(len(message).to_bytes(4, 'big') + message)
+            recv_msg_header = recv_ext_byt.recv_exact_bytes(self.tor_client_gp_chat_socket, 4)
+            received = recv_ext_byt.recv_exact_bytes(self.tor_client_gp_chat_socket, int.from_bytes(recv_msg_header, 'big'))
             payload = self.tor_proto.read_message(received)
             return True
         except Exception as e :
@@ -472,8 +483,6 @@ class RecvExactBytes():
 
                 if not chunk:
                     raise ConnectionError("Peer disconnected")
-                
-                    break
 
                 data += chunk
             except Exception as e:

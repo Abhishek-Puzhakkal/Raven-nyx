@@ -202,10 +202,16 @@ if user_input.mode == 'listen':
     clinett, clinet_addr = server.server_client_connect()
     if clinett:
         print(f'connected to {clinet_addr}')
-        trd = threading.Thread(target=server.server_recv_msg)
-        trd.start()
-        server.server_snt_msg()
-        server.serv_closing()
+        try:
+            trd = threading.Thread(target=server.server_recv_msg)
+            trd.start()
+            server.server_snt_msg()
+        except KeyboardInterrupt:
+            print('keyboard interrupted')
+        finally:
+            server.serv_closing()
+            if trd:
+                trd.join()
 
         
 elif user_input.mode == 'connect':
@@ -218,12 +224,17 @@ elif user_input.mode == 'connect':
         connection_result = client.clinet_server_connection()
 
         if connection_result:
-            trd = threading.Thread(target=client.client_recv_msg)
-            trd.start()
+            try:
+                trd = threading.Thread(target=client.client_recv_msg)
+                trd.start()
 
-            client.clinet_snt_msg()
-
-            client.clt_close()
+                client.clinet_snt_msg()
+            except KeyboardInterrupt:
+                print('keyboard interrupted')
+            finally:
+                client.clt_close()
+                if trd:
+                    trd.join()
     
     else : print(f'{user_input.addr[0]} is not an private ip ')
     
@@ -242,8 +253,6 @@ elif user_input.mode == 'connect-groupchat':
                 trd = threading.Thread(target=gp_cht_client.client_gp_cht_recv_msg)
                 trd.start()
                 gp_cht_client.client_gp_cht_snt_msg()
-                '''gp_cht_client.client_gp_cht_connection_cls()
-                trd.join()'''
             except KeyboardInterrupt:
                 print("\nServer stopped manually.")
             finally:
@@ -261,10 +270,6 @@ elif user_input.mode == 'listen-groupchat':
         trd = threading.Thread(target=gp_cht_server.connection)
         trd.start()
         gp_cht_server.gp_srvr_snt_msg()
-        '''gp_cht_server.gp_chat_close()
-        print(f"Is the thread actually dead? {not trd.is_alive()}")
-        trd.join()
-        '''
     except KeyboardInterrupt:
         print("\nServer stopped manually.")
     finally:
@@ -276,20 +281,33 @@ elif user_input.mode == 'conn-tr-cht':
     tr_client = TorClient(user_input.addr, user_input.u)
     connection_result = tr_client.clinet_tor_server_connection()
     if connection_result:
-        trd = threading.Thread(target=tr_client.client_recv_msg)
-        trd.start()
-        tr_client.clinet_snt_msg()
-        tr_client.client_conn_close()
+        try:
+            trd = threading.Thread(target=tr_client.client_recv_msg)
+            trd.start()
+            tr_client.clinet_snt_msg()
+        except KeyboardInterrupt:
+            print('keyboard interrupted')
+        finally:
+            tr_client.client_conn_close()
+            if trd:
+                trd.join()
+            
 
 elif user_input.mode == 'lstn-tr-cht':
     tr_server = TorOneToOneServer(user_input.u)
     clinett, clinet_addr = tr_server.tor_server_clinet_connect()
     if clinett:
         print(f'connected to {clinet_addr}')
-        trd = threading.Thread(target=tr_server.tor_server_recv_message)
-        trd.start()
-        tr_server.tor_server_snt_message()
-        tr_server.tor_server_closing()
+        try:
+            trd = threading.Thread(target=tr_server.tor_server_recv_message)
+            trd.start()
+            tr_server.tor_server_snt_message()
+        except KeyboardInterrupt:
+            print('keyboard interrputed ')
+        finally:
+            tr_server.tor_server_closing()
+            if trd:
+                trd.join()
 
 elif user_input.mode == 'conn_tr_gp_cht':
     tor_gp_cht_client = TorGpChatClient(user_input.addr, user_input.u)
