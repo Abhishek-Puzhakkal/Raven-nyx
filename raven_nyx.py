@@ -1,5 +1,5 @@
 import argparse
-from client import Client, GpChatClient, TorClient, TorGpChatClient
+from client import Client, GpChatClient, TorClient, TorGpChatClient, ContactLsit
 from server import Server, GroupChatServer, TorGpServer, TorOneToOneServer
 from file_sharing import *
 import threading
@@ -158,7 +158,7 @@ share_file_command.add_argument('--port', type=int, required=True, nargs=1, meta
 share_file_command.add_argument('--addr', required=True, nargs=1, metavar='private ip', help='private ip of receiver')
 share_file_command.add_argument('--file', nargs=1, required=True, metavar='file path', help='The path of the file to send')
 
-accept_file_command = sub_command.add_parser('accept_file', help='This is the command to receiver to get file ')
+accept_file_command = sub_command.add_parser('accept-file', help='This is the command to receiver to get file ')
 accept_file_command.add_argument('--path',required=True, nargs=1 , metavar='file path', help='specify a path to save the receiving file')
 accept_file_command.add_argument('--port', required=True, nargs=1, type=int, metavar='port number', help='specify a portnumber to listen for incomming connection')
 
@@ -185,12 +185,16 @@ conn_tor_chat.add_argument('-u', type=str, required=True, nargs=1, metavar='user
 tor_chat_listen = sub_command.add_parser('lstn-tr-cht', help='server to intiate tor server for communcation')
 tor_chat_listen.add_argument('-u', type=str, nargs=1, required=True, metavar='username', help='specify a name , that will appear in client chat box while messaging' )
 
-conn_tr_gp_cht = sub_command.add_parser('conn_tr_gp_cht', help='clinet to connect to server for group communcation')
+conn_tr_gp_cht = sub_command.add_parser('conn-tr-gp-cht', help='clinet to connect to server for group communcation')
 conn_tr_gp_cht.add_argument('--addr', type=str, nargs=1, required=True, metavar='onion address', help='specify the server onion address')
 conn_tr_gp_cht.add_argument('-u', type=str, nargs=1, required=True, metavar='username', help='this name will show in server and clients chat box while you messaging' )
 
-lstn_tr_gp_cht = sub_command.add_parser('lstn_tr_gp_cht',help='server to intiate tor server for group communication' )
+lstn_tr_gp_cht = sub_command.add_parser('lstn-tr-gp-cht',help='server to intiate tor server for group communication' )
 lstn_tr_gp_cht.add_argument('-u', type=str, nargs=1, required=True, metavar='username', help='specify a name , that will appear in clients chat box while you messaging')
+
+contact_list = sub_command.add_parser('contact-list',help='to find any existing contact ,or print full contact list ' )
+contact_list.add_argument('--grep',type=str, nargs=1, metavar='onion address or name of the address holder', help='to check a contact is exist in you contact list, it print the contact list of it exist ' )
+contact_list.add_argument('--show_all', action='store_true', help='to print the complete contact list line by line ')
 
 
 
@@ -309,7 +313,7 @@ elif user_input.mode == 'lstn-tr-cht':
             if trd:
                 trd.join()
 
-elif user_input.mode == 'conn_tr_gp_cht':
+elif user_input.mode == 'conn-tr-gp-cht':
     tor_gp_cht_client = TorGpChatClient(user_input.addr, user_input.u)
 
     connection_result = tor_gp_cht_client.client_gp_chat_connection()
@@ -325,7 +329,7 @@ elif user_input.mode == 'conn_tr_gp_cht':
             if trd:
                 trd.join()
 
-elif user_input.mode == 'lstn_tr_gp_cht':
+elif user_input.mode == 'lstn-tr-gp-cht':
     tor_gp_cht_server = TorGpServer(user_input.u)
     try :
         trd = threading.Thread(target=tor_gp_cht_server.tor_server_client_connection)
@@ -348,7 +352,7 @@ elif user_input.mode == 'share':
         share_file = LanFilesender(user_input.file, user_input.addr, user_input.port)
         share_file.send_file()
     else : print(f'{user_input.addr[0]} is not an private ip ')
-elif user_input.mode == 'accept_file':
+elif user_input.mode == 'accept-file':
     recv_file = LanFileReceiver(user_input.path, user_input.port)
     recv_file.recv_file()
 
@@ -358,6 +362,22 @@ elif user_input.mode == 'tr-share':
 elif user_input.mode == 'tr-accept-file':
     recv_file = TorFileReceiver(user_input.path)
     recv_file.recv_file()
+elif user_input.mode == 'contact-list':
+
+    contatlist = ContactLsit()
+
+    contact_exist = Path('.contact_list')
+
+    if contact_exist.exists():
+        if user_input.show_all:
+
+            contatlist.show_full_contact()
+        else:
+            contatlist.check_address_exist(user_input.grep[0])
+    else:
+        print("'.contact_list'  file not exist ")
+
+
 
 
 

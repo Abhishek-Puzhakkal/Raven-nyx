@@ -3,6 +3,8 @@ from noise.connection import NoiseConnection
 from pathlib import Path
 from stem.control import Controller
 import socks
+import base64
+import hashlib
 
 class Client:
     def __init__(self, ip, port, username):
@@ -142,6 +144,7 @@ class GpChatClient:
     def client_gp_chat_connection(self):
         try :
             self.client_gp_chat_socket.connect((self.addr, self.port))
+            print('connection successfull \n handshake starting...')
             self.proto = NoiseConnection.from_name(b'Noise_NN_25519_ChaChaPoly_SHA256')
             self.proto.set_as_initiator()
             self.proto.start_handshake()
@@ -152,6 +155,7 @@ class GpChatClient:
             recv_msg_header = recv_ext_byt.recv_exact_bytes(self.client_gp_chat_socket, 4)
             received = recv_ext_byt.recv_exact_bytes(self.client_gp_chat_socket, int.from_bytes(recv_msg_header, 'big'))
             payload = self.proto.read_message(received)
+            print('handshake finished.')
             return True
         except Exception as e :
             
@@ -255,24 +259,75 @@ class TorClient():
 
     def clinet_tor_server_connection(self) -> bool:
         try:
-            self.client_socket.set_proxy(socks.SOCKS5, '127.0.0.1', 9050)
 
-            self.client_socket.connect((self.tor_server_addr, 80))
-            print(f'client connected to {self.tor_server_addr}')
-            print('handshake starting....')
-            self.tor_proto = NoiseConnection.from_name(b'Noise_NN_25519_ChaChaPoly_SHA256')
-            self.tor_proto.set_as_initiator()
-            self.tor_proto.start_handshake()
-            recv_ext_byt = RecvExactBytes()
-            message = self.tor_proto.write_message()
-            message_size = len(message).to_bytes(4, 'big')
-            self.client_socket.sendall(message_size + message)
-            recv_msg_header = recv_ext_byt.recv_exact_bytes(self.client_socket, 4)
-            received = recv_ext_byt.recv_exact_bytes(self.client_socket, int.from_bytes(recv_msg_header, 'big'))
-            payload = self.tor_proto.read_message(received)
+            validation = OnionAddressValidation()
 
-            
-            return True
+            if validation.validate_onion_addrs(self.tor_server_addr):
+
+                contact_list = ContactLsit()
+                contact_list_exist = Path('.contact_list')
+
+                if contact_list_exist.exists():
+                    print(f'checking is {self.tor_server_addr} is in you contact list  ')
+                    if not contact_list.check_address_exist(self.tor_server_addr):
+                        print(f'{self.tor_server_addr} is not in your contact list you need to add it ??')
+                        choice = input('enter yes or no : ').lower().strip()
+
+                        while choice != 'yes' and choice != 'no':
+
+                            choice = input('you must enter yse or no :- ').lower().strip()
+
+                        if choice == 'yes' :
+                            name = input('enter the name of the onion address holder : ').lower().strip()
+                            if not name:
+                                while not name:
+                                    name = input('enter the name of the onion address holder : ').lower().strip()
+
+                            contact_list.add_address([name, self.tor_server_addr])
+                            print(f'{name} : {self.tor_server_addr}  saved to ".contact_list" file in this directory  ')
+                        else:
+                            pass
+                else:
+                    print("currently contact list not exist , \n you need to create one and add this address to contact list  ??? ")
+                    choice = input('enter yes or no : ').lower().strip()
+
+                    while choice != 'yes' and choice != 'no':
+
+                        choice = input('you must enter yes or no :- ').lower().strip()
+
+                    if choice == 'yes':
+                        name = input('enter the name of the onion address holder : ').lower().strip()
+                        if not name:
+                            while not name :
+                                name = input('enter the name of the onion address holder : ').lower().strip()
+
+                        contact_list.add_address([name, self.tor_server_addr])
+                        print(f'{name} : {self.tor_server_addr}  saved to ".contact_list" file in this directory  ')
+                    else:
+                        pass
+                        
+
+                self.client_socket.set_proxy(socks.SOCKS5, '127.0.0.1', 9050)
+                self.client_socket.connect((self.tor_server_addr, 80))
+                print(f'client connected to {self.tor_server_addr}')
+                print('handshake starting....')
+                self.tor_proto = NoiseConnection.from_name(b'Noise_NN_25519_ChaChaPoly_SHA256')
+                self.tor_proto.set_as_initiator()
+                self.tor_proto.start_handshake()
+                recv_ext_byt = RecvExactBytes()
+                message = self.tor_proto.write_message()
+                message_size = len(message).to_bytes(4, 'big')
+                self.client_socket.sendall(message_size + message)
+                recv_msg_header = recv_ext_byt.recv_exact_bytes(self.client_socket, 4)
+                received = recv_ext_byt.recv_exact_bytes(self.client_socket, int.from_bytes(recv_msg_header, 'big'))
+                payload = self.tor_proto.read_message(received)
+                print('handshake finished.')
+
+                
+                return True
+            else:
+                print(f'{self.tor_server_addr} is not a vlid onion addres, communcation terminating')
+                return False
         except KeyboardInterrupt:
             print('keyboard intrpted ')
             self.client_socket.close()
@@ -367,19 +422,70 @@ class TorGpChatClient:
         self.tor_proto = None
     def client_gp_chat_connection(self):
         try :
-            self.tor_client_gp_chat_socket.set_proxy(socks.SOCKS5, '127.0.0.1', 9050)
+            validation = OnionAddressValidation()
 
-            self.tor_client_gp_chat_socket.connect((self.tor_server_addr, 80))
-            self.tor_proto = NoiseConnection.from_name(b'Noise_NN_25519_ChaChaPoly_SHA256')
-            self.tor_proto.set_as_initiator()
-            self.tor_proto.start_handshake()
-            recv_ext_byt = RecvExactBytes()
-            message = self.tor_proto.write_message()
-            self.tor_client_gp_chat_socket.sendall(len(message).to_bytes(4, 'big') + message)
-            recv_msg_header = recv_ext_byt.recv_exact_bytes(self.tor_client_gp_chat_socket, 4)
-            received = recv_ext_byt.recv_exact_bytes(self.tor_client_gp_chat_socket, int.from_bytes(recv_msg_header, 'big'))
-            payload = self.tor_proto.read_message(received)
-            return True
+            if validation.validate_onion_addrs(self.tor_server_addr):
+
+                contact_list = ContactLsit()
+                contact_list_exist = Path('.contact_list')
+                if contact_list_exist.exists():
+                    print(f'checking is {self.tor_server_addr} in you contact list')
+                    if not contact_list.check_address_exist(self.tor_server_addr):
+                        print(f'{self.tor_server_addr} is not in your contact list you need to add it ??')
+                        choice = input('enter yes or no : ').lower().strip()
+
+                        while choice != 'yes' and choice != 'no':
+                            choice = input('enter yes or no : ').lower().strip()
+
+
+                        if choice == 'yes':
+                            name = input('enter the name of the onion address holder : ').lower()
+                            contact_list.add_address([name, self.tor_server_addr])
+                            print(f'{name} : {self.tor_server_addr}  saved to ".contact_list" file in this directory  ')
+                        elif choice == 'no':
+                            pass
+                        
+                else:
+                    print("currently contact list not exist , \n you need to create one and add this address to contact list  ??? ")
+                    choice = input('enter yes or no : ').lower().strip()
+
+                    while choice != 'yes' and choice != 'no':
+
+                        choice = input('you must enter yes or no :- ').lower().strip()
+
+                    if choice == 'yes' :
+                        name = input('enter the name of the onion address holder : ').lower().strip()
+                        if not name:
+                            while not name:
+                                name = input('enter the name of the onion address holder : ').lower().strip()
+
+                        contact_list.add_address([name, self.tor_server_addr])
+                        print(f'{name} : {self.tor_server_addr}  saved to ".contact_list" file in this directory  ')
+                    else:
+                        pass
+                   
+
+
+            
+                self.tor_client_gp_chat_socket.set_proxy(socks.SOCKS5, '127.0.0.1', 9050)
+
+                self.tor_client_gp_chat_socket.connect((self.tor_server_addr, 80))
+                print('connection successfull \n handshake starting...')
+                self.tor_proto = NoiseConnection.from_name(b'Noise_NN_25519_ChaChaPoly_SHA256')
+                self.tor_proto.set_as_initiator()
+                self.tor_proto.start_handshake()
+                recv_ext_byt = RecvExactBytes()
+                message = self.tor_proto.write_message()
+                self.tor_client_gp_chat_socket.sendall(len(message).to_bytes(4, 'big') + message)
+                recv_msg_header = recv_ext_byt.recv_exact_bytes(self.tor_client_gp_chat_socket, 4)
+                received = recv_ext_byt.recv_exact_bytes(self.tor_client_gp_chat_socket, int.from_bytes(recv_msg_header, 'big'))
+                payload = self.tor_proto.read_message(received)
+                print('handshake finished')
+                return True
+            else:
+                print(f'{self.tor_server_addr} is not a valid onion address , communication terminating ...')
+                return False
+            
         except Exception as e :
             
             print(e)
@@ -489,6 +595,113 @@ class RecvExactBytes():
                 raise e 
         
         return data
+
+
+class ContactLsit():
+    def __init__(self):
+    
+        self.contact_list = Path('.contact_list')
+    def add_address(self, details : list):
+        if self.contact_list.exists():
+
+            with open('.contact_list', 'a') as file:
+                file.write(f"{details[0]} : {details[1]}\n")
+        else:
+            with open('.contact_list', 'w') as file:
+                file.write(f"{details[0]} : {details[1]}\n")
+            self.contact_list.chmod(0o600)
+    
+    def check_address_exist(self, detail):
+        
+        address_first = True
+
+        while address_first:
+            with open('.contact_list', 'r') as file:
+                for line in file:
+                    line = line.strip()
+                    if line.endswith(detail):
+                        parts = line.split(':')
+                        if parts[1].strip() == detail:
+                            print(f'contact found {parts[0]} : {parts[1]}')
+                            return True
+                
+                address_first = False
+        
+        while not address_first:
+            with open('.contact_list', 'r') as file:
+                
+                for line in file:
+                    line = line.strip()
+                    if line.startswith(detail):
+                        address_first = True
+                        parts = line.split(':')
+                        if parts[0].strip() == detail:
+                            print(f'contact found {parts[0]} : {parts[1]}')
+                            return True
+                print('contact not exist in .contact_list ')
+                address_first = True
+
+        return False
+    
+    def show_full_contact(self):
+
+        path_exist = Path('.contact_list')
+
+        if path_exist.exists():
+
+            with open('.contact_list', 'r') as file:
+
+                for line in file:
+
+                    print(f'{line} \n ')
+        else:
+            print("currently '.contact_list' file not exist ")
+
+'''
+source = https://spec.torproject.org/address-spec
+
+For version 3 onion service addresses, onion_address is defined as:
+
+
+     onion_address = base32(PUBKEY | CHECKSUM | VERSION)
+     CHECKSUM = SHA3_256(".onion checksum" | PUBKEY | VERSION)[:2]
+
+     where:
+       - PUBKEY is the 32-byte ed25519 master pubkey (KP_hs_id)
+         of the onion service.
+       - VERSION is a one-byte version field (default value '\x03')
+       - ".onion checksum" is a constant string
+       - CHECKSUM is truncated to two bytes before inserting it in onion_address
+'''
+
+class OnionAddressValidation():
+    def validate_onion_addrs(self, onion_address : str):
+        try:
+            addrs = onion_address.replace('.onion', '')
+            if len(addrs) != 56:
+                return False
+            
+            base_32_decoded = base64.b32decode(addrs.upper())
+
+            pubkey = base_32_decoded[0:32]
+            checksum = base_32_decoded[32:34]
+            version = base_32_decoded[34:35]
+
+            if version != b'\x03':
+                return False
+            
+            recalculating_checksum = hashlib.sha3_256(b'.onion checksum' + pubkey + version).digest()
+
+            if checksum != recalculating_checksum[:2]:
+                return False
+        
+            return True
+        except Exception as e :
+            print(e)
+            return False
+
+
+
 
 
 

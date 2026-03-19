@@ -7,4 +7,5 @@ venv/
 *_checking.*
 hello.txt
 .onion_key.txt
+.contact_list
 ghost_pipe.py

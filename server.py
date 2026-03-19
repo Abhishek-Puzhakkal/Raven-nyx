@@ -26,6 +26,7 @@ class Server:
             self.server.listen()
 
             self.client, clinet_addr = self.server.accept()
+            print('connection successfull\nhandshake starting...')
             recv_exact_byte = RecvExactBytes()
             self.proto = NoiseConnection.from_name(b'Noise_NN_25519_ChaChaPoly_SHA256')
             self.proto.set_as_responder()
@@ -43,7 +44,7 @@ class Server:
                     header_size = int.from_bytes(received_message_header, 'big')
                     data = recv_exact_byte.recv_exact_bytes(self.client, header_size)
                     plaintext = self.proto.read_message(data)
-
+            print('handshake completed... \n')
             return self.client, clinet_addr
         
         except KeyboardInterrupt:
