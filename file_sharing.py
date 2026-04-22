@@ -695,7 +695,7 @@ class LanFillesSender():
 
             if self.session_key.decrypt(intial_flag).decode() == 'FILE_INFO_GOT':
 
-                del self.send_filles
+                del sending_files
 
                 recver_confermation_flag_header = recv_exact_byte.recv_exact_bytes(self.file_sender_socket,2)
                 flag_size = int.from_bytes(recver_confermation_flag_header,'big')
