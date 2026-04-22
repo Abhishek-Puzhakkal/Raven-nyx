@@ -683,7 +683,7 @@ class LanFillesSender():
             for file_path in self.file_paths:
                 sending_files.append(Path(file_path).name)
             
-            encrypted_seding_file_data = self.session_key.encrypt(','.join(self.sending_files).encode())
+            encrypted_seding_file_data = self.session_key.encrypt(','.join(sending_files).encode())
 
             len_encrypted_seding_file_data = len(encrypted_seding_file_data).to_bytes(4,'big')
 
