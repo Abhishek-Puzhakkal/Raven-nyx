@@ -156,7 +156,7 @@ listent_command.add_argument('-u', required=True, type=str, nargs=1, metavar='us
 share_file_command = sub_command.add_parser('share', help='This is the command for sender to sent file ')
 share_file_command.add_argument('--port', type=int, required=True, nargs=1, metavar='port numebr', help='reciver listening port number')
 share_file_command.add_argument('--addr', required=True, nargs=1, metavar='private ip', help='private ip of receiver')
-share_file_command.add_argument('--file', required=True, metavar='file path', help='The path of the file to send')
+share_file_command.add_argument('--file',nargs='+', required=True, metavar='file path', help='The path of the file to send')
 
 accept_file_command = sub_command.add_parser('accept-file', help='This is the command to receiver to get file ')
 '''accept_file_command.add_argument('--path',required=True, nargs=1 , metavar='file path', help='specify a path to save the receiving file')'''
