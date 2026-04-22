@@ -888,31 +888,31 @@ class LanFillesReceiver():
             client_socket.sendall(len_downloading_flag_success_flag_encrypted + downloading_file_success_flag_encrypted)
 
             
-            for files in range(len(downloading_files_decrypted)):
+            for index_files in range(len(downloading_files_decrypted)):
 
-                file_path_valid = abs_file_path / downloading_files_decrypted[files]
+                file_path_valid = abs_file_path / downloading_files_decrypted[index_files]
 
                 file_path_set = set()
 
                 if file_path_valid.exists():
 
-                    print(f'{downloading_files_decrypted[files]} is alredy exsit in {file_path_valid} ...')
-                    choice = input(f'you must remove it from downloading list or update it with another non existing filename instead of  {downloading_files_decrypted[files]} \n for removing this file from downloading list  type "remv" \n to update type "rename" \n').lower().strip()
+                    print(f'{downloading_files_decrypted[index_files]} is alredy exsit in {file_path_valid} ...')
+                    choice = input(f'\nyou must remove it from downloading list or update it with another non existing filename instead of  {downloading_files_decrypted[index_files]} \n for removing this file from downloading list  type "remv" \n to update type "rename" \n').lower().strip()
 
                     if choice != 'remv' or choice != 'rename':
 
                         invalidd = True
 
                         while invalidd:
-                            choice = input(f'you must answer this qn you need to remove {downloading_files_decrypted[files]} or update it with another file name  \n for removing this file type "remv" \n to update type "rename" \n').lower().strip()
+                            choice = input(f'you must answer this qn you need to remove {downloading_files_decrypted[index_files]} or update it with another file name  \n for removing this file type "remv" \n to update type "rename" \n').lower().strip()
                             if choice == 'remv' or choice == 'rename':
                                 invalidd = False
                         
                         if choice == 'remv':
 
-                            downloading_files_decrypted.pop(files)
+                            downloading_files_decrypted.pop(index_files)
 
-                            non_downloading_file_list.append(str(file))
+                            non_downloading_file_list.append(str(index_files))
                         else:
 
                             valid_path = Path(input('enter a valid file name  = ').strip())
@@ -926,7 +926,7 @@ class LanFillesReceiver():
                                     if valid_path.exists() and valid_path not in file_path_set:
                                         break
                                 
-                                downloading_files_decrypted[files] = valid_path
+                                downloading_files_decrypted[index_files] = valid_path
                                 file_path_set.add(valid_path)
                             elif not valid_path.exists() and valid_path in file_path_set:
 
@@ -938,16 +938,16 @@ class LanFillesReceiver():
                                     if not valid_path.exists() and valid_path not in file_path_set:
                                         break
 
-                                downloading_files_decrypted[files] = valid_path
+                                downloading_files_decrypted[index_files] = valid_path
                                 file_path_set.add(valid_path)
                             else:
-                                downloading_files_decrypted[files] = valid_path
+                                downloading_files_decrypted[index_files] = valid_path
                                 file_path_set.add(valid_path)
                      
                     elif choice == 'remv':
-                        downloading_files_decrypted.pop(files)
+                        downloading_files_decrypted.pop(index_files)
 
-                        non_downloading_file_list.append(str(file))
+                        non_downloading_file_list.append(str(index_files))
                     
                     else:
                         valid_path = Path(input('enter a valid file name  = ').strip())
@@ -961,7 +961,7 @@ class LanFillesReceiver():
                                 if valid_path.exists() and valid_path not in file_path_set:
                                     break
                             
-                            downloading_files_decrypted[files] = valid_path
+                            downloading_files_decrypted[index_files] = valid_path
                             file_path_set.add(valid_path)
                         elif not valid_path.exists() and valid_path in file_path_set:
 
@@ -973,10 +973,10 @@ class LanFillesReceiver():
                                 if not valid_path.exists() and valid_path not in file_path_set:
                                     break
 
-                            downloading_files_decrypted[files] = valid_path
+                            downloading_files_decrypted[index_files] = valid_path
                             file_path_set.add(valid_path)
                         else:
-                            downloading_files_decrypted[files] = valid_path
+                            downloading_files_decrypted[index_files] = valid_path
                             file_path_set.add(valid_path)
 
 
