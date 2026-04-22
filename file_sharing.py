@@ -730,7 +730,7 @@ class LanFillesSender():
 
                     if self.file_paths[file_pointer]:
 
-                        file_path = self.file_paths[file_pointer]
+                        file_path = Path(self.file_paths[file_pointer])
                 
                         print(f'creating checksum of   {file_path}')
                         sha256_hash = hashlib.sha256()
