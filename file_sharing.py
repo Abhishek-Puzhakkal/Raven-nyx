@@ -701,8 +701,10 @@ class LanFillesSender():
                 flag_size = int.from_bytes(recver_confermation_flag_header,'big')
                 recver_confermation_flag = recv_exact_byte.recv_exact_bytes(self.file_sender_socket, flag_size)
 
+                actual_confermation_flag = self.session_key.decrypt(recver_confermation_flag).decode()
+
                 
-                if self.session_key.decrypt(recver_confermation_flag).decode() == 'REMV_FILES_AND_SEND':
+                if actual_confermation_flag == 'REMV_FILES_AND_SEND':
 
                     removing_files_info_header = recv_exact_byte.recv_exact_bytes(self.file_sender_socket,4)
                     flag_size = int.from_bytes(removing_files_info_header,'big')
@@ -716,8 +718,9 @@ class LanFillesSender():
 
                         self.file_paths[int(index_num)] = None
 
-                elif self.session_key.decrypt(recver_confermation_flag).decode() == 'START_SENDING':
+                elif actual_confermation_flag == 'START_SENDING':
                     pass
+
 
 
                 file_pointer = 0
