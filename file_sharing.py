@@ -899,7 +899,7 @@ class LanFillesReceiver():
                     print(f'{downloading_files_decrypted[index_files]} is alredy exsit in {file_path_valid} ...')
                     choice = input(f'\nyou must remove it from downloading list or update it with another non existing filename instead of  {downloading_files_decrypted[index_files]} \n for removing this file from downloading list  type "remv" \n to update type "rename" \n').lower().strip()
 
-                    if choice != 'remv' or choice != 'rename':
+                    if choice != 'remv' and choice != 'rename':
 
                         invalidd = True
 
@@ -910,7 +910,7 @@ class LanFillesReceiver():
                         
                         if choice == 'remv':
 
-                            downloading_files_decrypted.pop(index_files)
+                            downloading_files_decrypted[index_files] = None
 
                             non_downloading_file_list.append(str(index_files))
                         else:
@@ -921,7 +921,7 @@ class LanFillesReceiver():
 
                                 while True:
 
-                                    valid_path = Path(input('enter a valid path = ').strip())
+                                    valid_path = Path(input(f'enter a valid path {valid_path} alredy exists = ').strip())
 
                                     if valid_path.exists() and valid_path not in file_path_set:
                                         break
@@ -945,7 +945,7 @@ class LanFillesReceiver():
                                 file_path_set.add(valid_path)
                      
                     elif choice == 'remv':
-                        downloading_files_decrypted.pop(index_files)
+                        downloading_files_decrypted[index_files] = None
 
                         non_downloading_file_list.append(str(index_files))
                     
@@ -956,7 +956,7 @@ class LanFillesReceiver():
 
                             while True:
 
-                                valid_path = Path(input('enter a valid path = ').strip())
+                                valid_path = Path(input(f'enter a valid path {valid_path} alredy exists = ').strip())
 
                                 if valid_path.exists() and valid_path not in file_path_set:
                                     break
@@ -1010,87 +1010,89 @@ class LanFillesReceiver():
 
             while file_pointer < len(downloading_files_decrypted):
 
-                full_path = abs_file_path / downloading_files_decrypted[file_pointer]
-
-                file_header_size = recv_exact_byte.recv_exact_bytes(client_socket, 2)
-
-                encrypted_file_header = recv_exact_byte.recv_exact_bytes(client_socket, int.from_bytes(file_header_size,'big'))
-
-                file_header = json.loads(self.session_key.decrypt(encrypted_file_header).decode())
-
-                file_size = file_header['file_size']
-                
-                checksum = file_header['checksum']
-                print(f'\nsender given metadata  file_size_in_bytes : { file_size}   checksum = {checksum}')
-
-                if file_size and checksum:
-                    response_flag = self.session_key.encrypt('FILE_HEADER_GOT_SUCCESSFULLY'.encode())
-
-                    size_response_flag = len(response_flag).to_bytes(2, 'big')
-
-                    client_socket.sendall(size_response_flag + response_flag)
-
-
-                    with open(full_path, 'wb') as file:
-
-                        received_chunk_size = 0
-
-                        p_bar = tqdm(total=file_size, unit='B', unit_scale=True, desc="Receiving")
-
-                        while received_chunk_size < file_size:
-
-                            chunk_size = recv_exact_byte.recv_exact_bytes(client_socket, 4)
-
-                            encrypted_chunk = recv_exact_byte.recv_exact_bytes(client_socket, int.from_bytes(chunk_size, 'big'))
-                            decrypted_chunk = self.session_key.decrypt(encrypted_chunk)
-                
-                            file.write(decrypted_chunk)
-
-                            received_chunk_size += len(decrypted_chunk)
-
-                            p_bar.update(len(decrypted_chunk))
-                        
-                        p_bar.close()
+                if downloading_files_decrypted[file_pointer]:
                     
-                    print('\nfile received ...\n Recalculating checksum of received file ...')
+                    full_path = abs_file_path / downloading_files_decrypted[file_pointer]
 
-                    sha256_hash = hashlib.sha256()
+                    file_header_size = recv_exact_byte.recv_exact_bytes(client_socket, 2)
 
-                    with open(full_path, 'rb') as file:
-                        while True:
-                            data = file.read(65536)
-                            if not data:
-                                break
+                    encrypted_file_header = recv_exact_byte.recv_exact_bytes(client_socket, int.from_bytes(file_header_size,'big'))
+
+                    file_header = json.loads(self.session_key.decrypt(encrypted_file_header).decode())
+
+                    file_size = file_header['file_size']
+                    
+                    checksum = file_header['checksum']
+                    print(f'\nsender given metadata  file_size_in_bytes : { file_size}   checksum = {checksum}')
+
+                    if file_size and checksum:
+                        response_flag = self.session_key.encrypt('FILE_HEADER_GOT_SUCCESSFULLY'.encode())
+
+                        size_response_flag = len(response_flag).to_bytes(2, 'big')
+
+                        client_socket.sendall(size_response_flag + response_flag)
+
+
+                        with open(full_path, 'wb') as file:
+
+                            received_chunk_size = 0
+
+                            p_bar = tqdm(total=file_size, unit='B', unit_scale=True, desc="Receiving")
+
+                            while received_chunk_size < file_size:
+
+                                chunk_size = recv_exact_byte.recv_exact_bytes(client_socket, 4)
+
+                                encrypted_chunk = recv_exact_byte.recv_exact_bytes(client_socket, int.from_bytes(chunk_size, 'big'))
+                                decrypted_chunk = self.session_key.decrypt(encrypted_chunk)
+                    
+                                file.write(decrypted_chunk)
+
+                                received_chunk_size += len(decrypted_chunk)
+
+                                p_bar.update(len(decrypted_chunk))
                             
-                            sha256_hash.update(data)
+                            p_bar.close()
+                        
+                        print('\nfile received ...\n Recalculating checksum of received file ...')
 
-                    if sha256_hash.hexdigest() == checksum:
+                        sha256_hash = hashlib.sha256()
 
-                        print(f'\nRecalculated_checksum :- {sha256_hash.hexdigest()}\nChecksum matches')
-                        print('File received successfully...')
-                        response_flag = self.session_key.encrypt('FILE_DOWNLOADED_SUCCESSFULLY'.encode())
-                        response_flag_size = len(response_flag).to_bytes(2, 'big')
-                        client_socket.sendall(response_flag_size + response_flag)
-                        file_pointer += 1
-                    else:
-                        response_flag = self.session_key.encrypt('FILE_DOWNLOADED_UNSUCCESSFULLY'.encode())
-                        response_flag_size = len(response_flag).to_bytes(2, 'big')
-                        client_socket.sendall(response_flag_size + response_flag)
-                        print('\nSomthing went wrong... \n Checksum missmatch...')
-                        print(f'\nsender given checksum :- {checksum}')
-                        print(f'\nreceived file checksum :- {sha256_hash.hexdigest()} \n')
-                        print(f'deleting {full_path}')
-                        full_path.unlink()
-                        itemm = downloading_files_decrypted.pop(file_pointer)
-                        if itemm in correption_set:
-                            print(f'{itemm} alredy tried once aging checksum mismathc occured so program going to kick out {itemm} from trying to downloading again')
+                        with open(full_path, 'rb') as file:
+                            while True:
+                                data = file.read(65536)
+                                if not data:
+                                    break
+                                
+                                sha256_hash.update(data)
+
+                        if sha256_hash.hexdigest() == checksum:
+
+                            print(f'\nRecalculated_checksum :- {sha256_hash.hexdigest()}\nChecksum matches')
+                            print('File received successfully...')
+                            response_flag = self.session_key.encrypt('FILE_DOWNLOADED_SUCCESSFULLY'.encode())
+                            response_flag_size = len(response_flag).to_bytes(2, 'big')
+                            client_socket.sendall(response_flag_size + response_flag)
                             file_pointer += 1
                         else:
-                            downloading_files_decrypted.append(itemm)
-                            correption_set.add(itemm)
-                            print(f'{itemm} will contiue downloding at last for one more time ')
+                            response_flag = self.session_key.encrypt('FILE_DOWNLOADED_UNSUCCESSFULLY'.encode())
+                            response_flag_size = len(response_flag).to_bytes(2, 'big')
+                            client_socket.sendall(response_flag_size + response_flag)
+                            print('\nSomthing went wrong... \n Checksum missmatch...')
+                            print(f'\nsender given checksum :- {checksum}')
+                            print(f'\nreceived file checksum :- {sha256_hash.hexdigest()} \n')
+                            print(f'deleting {full_path}')
+                            full_path.unlink()
+                            itemm = downloading_files_decrypted.pop(file_pointer)
+                            if itemm in correption_set:
+                                print(f'{itemm} alredy tried once aging checksum mismathc occured so program going to kick out {itemm} from trying to downloading again')
+                                file_pointer += 1
+                            else:
+                                downloading_files_decrypted.append(itemm)
+                                correption_set.add(itemm)
+                                print(f'{itemm} will contiue downloding at last for one more time ')
 
-                
+                    
 
 
 
@@ -1103,15 +1105,22 @@ class LanFillesReceiver():
 
 
 
-                
+                    
+                                
+
                             
+
+
+                                
+
+
+
+
+
+
+
 
                         
-
-
-                            
-
-
 
 
 
@@ -1125,25 +1134,18 @@ class LanFillesReceiver():
 
 
 
-                
 
 
 
 
 
 
-
-
-
-
-
-
-    
-    
-
-    
+        
+        
 
         
 
+            
 
-    
+
+        
