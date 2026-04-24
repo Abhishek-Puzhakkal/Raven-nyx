@@ -813,6 +813,7 @@ class LanFillesSender():
                             self.file_sender_socket.close()
                             break
                     else:
+                        file_pointer += 1
                         pass
                 print('session closing....')
 
