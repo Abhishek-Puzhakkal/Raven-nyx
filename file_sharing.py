@@ -710,7 +710,7 @@ class LanFillesSender():
                     flag_size = int.from_bytes(removing_files_info_header,'big')
                     removing_files_info = recv_exact_byte.recv_exact_bytes(self.file_sender_socket, flag_size)
 
-                    removing_files_info_decrypted = self.session_key.decrypt(removing_files_info)
+                    removing_files_info_decrypted = self.session_key.decrypt(removing_files_info).decode()
 
                     removing_files_info_decrypted = removing_files_info_decrypted.split(',')
 
