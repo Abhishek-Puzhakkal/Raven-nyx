@@ -1100,6 +1100,8 @@ class LanFillesReceiver():
                                 downloading_files_decrypted.append(itemm)
                                 correption_set.add(itemm)
                                 print(f'{itemm} will contiue downloding at last for one more time ')
+                else:
+                    file_pointer += 1
 
                     
 
