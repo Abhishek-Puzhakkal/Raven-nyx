@@ -717,6 +717,10 @@ class LanFillesSender():
                     for index_num in removing_files_info_decrypted:
 
                         self.file_paths[int(index_num)] = None
+                    
+                    #debugging
+
+                    print(f'updated seding file list = {self.file_paths}')
 
                 elif actual_confermation_flag == 'START_SENDING':
                     pass
@@ -727,6 +731,9 @@ class LanFillesSender():
 
                 
                 while file_pointer < len(self.file_paths):
+
+                    #debugging
+                    print(f'file_pointer = {file_pointer}')
 
                     if self.file_paths[file_pointer]:
 
@@ -805,7 +812,8 @@ class LanFillesSender():
                     
                             self.file_sender_socket.close()
                             break
-                
+                    else:
+                        pass
                 print('session closing....')
 
                 self.file_sender_socket.close()
