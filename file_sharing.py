@@ -592,7 +592,8 @@ class TorFileReceiver():
                     self.file_recevier_socket.close()
 
 class LanFillesSender():
-    def __init__(self, file_path, receiver_addr, port):
+    def __init__(self, file_path, receiver_addr, port = [58432], medium = False):
+        self.medium = medium
         self.file_paths = file_path
         self.recevier_addr = receiver_addr[0]
         self.port = port[0]
@@ -659,22 +660,40 @@ class LanFillesSender():
                 file_path_set.add(self.file_paths[files])
 
         if self.file_paths:
+            if not self.medium:
+                self.file_sender_socket.connect((self.recevier_addr, self.port))
+                print('\nconnection successfull... \n handshake starting....')
+                self.session_key.set_as_initiator()
+                self.session_key.start_handshake()
+                message = self.session_key.write_message()
+                message_size_header = len(message).to_bytes(4,'big')
+                self.file_sender_socket.sendall(message_size_header + message)
+                recv_exact_byte = RecvExactBytes()
 
-            self.file_sender_socket.connect((self.recevier_addr, self.port))
-            print('\nconnection successfull... \n handshake starting....')
-            self.session_key.set_as_initiator()
-            self.session_key.start_handshake()
-            message = self.session_key.write_message()
-            message_size_header = len(message).to_bytes(4,'big')
-            self.file_sender_socket.sendall(message_size_header + message)
-            recv_exact_byte = RecvExactBytes()
+                received_message_header = recv_exact_byte.recv_exact_bytes(self.file_sender_socket, 4)
+                received_message_size = int.from_bytes(received_message_header, 'big')
 
-            received_message_header = recv_exact_byte.recv_exact_bytes(self.file_sender_socket, 4)
-            received_message_size = int.from_bytes(received_message_header, 'big')
+                received_message = recv_exact_byte.recv_exact_bytes(self.file_sender_socket, received_message_size)
 
-            received_message = recv_exact_byte.recv_exact_bytes(self.file_sender_socket, received_message_size)
+                payload = self.session_key.read_message(received_message)
+            else:
+                self.file_sender_socket.set_proxy(socks.SOCKS5, '127.0.0.1', 9050)
+                self.file_sender_socket.connect((self.recevier_addr, 80))
+                print('\nconnection successfull... \n handshake starting....')
+                self.session_key.set_as_initiator()
+                self.session_key.start_handshake()
+                message = self.session_key.write_message()
+                message_size_header = len(message).to_bytes(4,'big')
+                self.file_sender_socket.sendall(message_size_header + message)
+                recv_exact_byte = RecvExactBytes()
 
-            payload = self.session_key.read_message(received_message)
+                received_message_header = recv_exact_byte.recv_exact_bytes(self.file_sender_socket, 4)
+                received_message_size = int.from_bytes(received_message_header, 'big')
+
+                received_message = recv_exact_byte.recv_exact_bytes(self.file_sender_socket, received_message_size)
+
+                payload = self.session_key.read_message(received_message)
+
 
             print('handshake finished...')
 
@@ -717,10 +736,6 @@ class LanFillesSender():
                     for index_num in removing_files_info_decrypted:
 
                         self.file_paths[int(index_num)] = None
-                    
-                    #debugging
-
-                    print(f'updated seding file list = {self.file_paths}')
 
                 elif actual_confermation_flag == 'START_SENDING':
                     pass
@@ -731,9 +746,6 @@ class LanFillesSender():
 
                 
                 while file_pointer < len(self.file_paths):
-
-                    #debugging
-                    print(f'file_pointer = {file_pointer}')
 
                     if self.file_paths[file_pointer]:
 
@@ -831,12 +843,16 @@ class LanFillesSender():
 
 
 class LanFillesReceiver():
-    def __init__(self, port):
+    def __init__(self, port = [58432], medium = False):
+
+        self.medium = medium
         '''self.file_path = file_path[0]'''
         self.port = port[0]
         self.file_recevier_socket = socket.socket()
         self.session_key = NoiseConnection.from_name(b'Noise_NN_25519_ChaChaPoly_SHA256')
-
+        self.key_path = Path('.onion_key.txt')
+        self.tor_controller = Controller.from_port()
+        
     def recv_files(self):
         
         '''file_path = Path(self.file_path).expanduser()'''
@@ -844,16 +860,40 @@ class LanFillesReceiver():
 
         abs_file_path.mkdir(mode=700, parents=True, exist_ok=True)
 
+        if not self.medium:
+            self.file_recevier_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-        self.file_recevier_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.file_recevier_socket.bind(('0.0.0.0', self.port))
 
-        self.file_recevier_socket.bind(('0.0.0.0', self.port))
+            self.file_recevier_socket.listen()
 
-        self.file_recevier_socket.listen()
+            client_socket , addr = self.file_recevier_socket.accept()
 
-        client_socket , addr = self.file_recevier_socket.accept()
+            print(f'\n{addr} connected successfully...\n handshake initialising...')
+        else:
+            self.tor_controller.authenticate()
 
-        print(f'\n{addr} connected successfully...\n handshake initialising...')
+            if not self.key_path.exists():
+                service = self.tor_controller.create_ephemeral_hidden_service({80: 5000}, await_publication = True)
+                print("Started a new hidden service with the address of %s.onion" % service.service_id)
+
+                with open(self.key_path, 'w') as key_file:
+                    key_file.write('%s:%s' % (service.private_key_type, service.private_key))
+            else:
+                with open(self.key_path) as key_file:
+                    key_type, key_content = key_file.read().split(':', 1)
+
+                service = self.tor_controller.create_ephemeral_hidden_service({80: 5000}, key_type = key_type, key_content = key_content, await_publication = True)
+                print("Resumed %s.onion" % service.service_id)
+
+                self.file_recevier_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                self.file_recevier_socket.bind(('127.0.0.1', 5000))
+
+                self.file_recevier_socket.listen()
+
+                client_socket , addr = self.file_recevier_socket.accept()
+
+                print(f'\n{addr} connected successfully...\n handshake initialising...')
 
         self.session_key.set_as_responder()
         self.session_key.start_handshake()
@@ -1102,7 +1142,21 @@ class LanFillesReceiver():
                                 print(f'{itemm} will contiue downloding at last for one more time ')
                 else:
                     file_pointer += 1
-
+        if not self.medium:
+            if client_socket:
+                client_socket.close()
+                self.file_recevier_socket.close()
+            else:
+                self.file_recevier_socket.close()
+        else:
+            if client_socket:
+                client_socket.close()
+                self.file_recevier_socket.close()
+                self.tor_controller.close()
+            else:
+                self.file_recevier_socket.close()
+                self.tor_controller.close()
+            
                     
 
 

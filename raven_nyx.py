@@ -154,13 +154,13 @@ listent_command.add_argument('--port', type=int, required=True, nargs=1, metavar
 listent_command.add_argument('-u', required=True, type=str, nargs=1, metavar='username', help='this will be your username , and it will print in oppsite end chating area ')
 
 share_file_command = sub_command.add_parser('share', help='This is the command for sender to sent file ')
-share_file_command.add_argument('--port', type=int, required=True, nargs=1, metavar='port numebr', help='reciver listening port number')
+share_file_command.add_argument('--port', type=int, nargs=1, metavar='port numebr', help='reciver listening port number')
 share_file_command.add_argument('--addr', required=True, nargs=1, metavar='private ip', help='private ip of receiver')
 share_file_command.add_argument('--file',nargs='+', required=True, metavar='file path', help='The path of the file to send')
 
 accept_file_command = sub_command.add_parser('accept-file', help='This is the command to receiver to get file ')
 '''accept_file_command.add_argument('--path',required=True, nargs=1 , metavar='file path', help='specify a path to save the receiving file')'''
-accept_file_command.add_argument('--port', required=True, nargs=1, type=int, metavar='port number', help='specify a portnumber to listen for incomming connection')
+accept_file_command.add_argument('--port', nargs=1, type=int, metavar='port number', help='specify a portnumber to listen for incomming connection')
 
 tor_share_file_command = sub_command.add_parser('tr-share', help='send file through tor ')
 tor_share_file_command.add_argument('--file', nargs=1, required=True, metavar='file path', help='The path of the file to send')
@@ -348,12 +348,18 @@ elif user_input.mode == 'share':
     ip_validation = IpAddressValidation()
 
     if ip_validation.validation(user_input.addr):
-
-        share_file = LanFillesSender(user_input.file, user_input.addr, user_input.port)
+        if user_input.port:
+            share_file = LanFillesSender(user_input.file, user_input.addr, user_input.port)
+        else:
+            share_file = LanFillesSender(user_input.file, user_input.addr)
         share_file.send_filles()
     else : print(f'{user_input.addr[0]} is not an private ip ')
 elif user_input.mode == 'accept-file':
-    recv_file = LanFillesReceiver(user_input.port)
+    if user_input.port:
+        recv_file = LanFillesReceiver(user_input.port)
+    else:
+        recv_file = LanFillesReceiver()
+
     recv_file.recv_files()
 
 elif user_input.mode == 'tr-share':
