@@ -363,11 +363,11 @@ elif user_input.mode == 'accept-file':
     recv_file.recv_files()
 
 elif user_input.mode == 'tr-share':
-    share_file = TorFilesender(user_input.file, user_input.addr)
-    share_file.send_file()
+    share_file = LanFillesSender(user_input.file, user_input.addr, medium=True)
+    share_file.send_filles()
 elif user_input.mode == 'tr-accept-file':
-    recv_file = TorFileReceiver(user_input.path)
-    recv_file.recv_file()
+    recv_file = LanFillesReceiver(user_input.path, medium=True)
+    recv_file.recv_files()
 elif user_input.mode == 'contact-list':
 
     contatlist = ContactLsit()
